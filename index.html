@@ -1,1 +1,49 @@
-<!DOCTYPE html> <html lang="fr"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1"> <title>TEST MISE À JOUR GITHUB</title> <style> body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: Arial, sans-serif; background: #ff3030; color: white; text-align: center; } main { padding: 30px; } h1 { font-size: clamp(32px, 7vw, 64px); } .version { display: inline-block; padding: 12px 20px; background: white; color: #d90000; border-radius: 10px; font-weight: bold; font-size: 22px; } </style> </head> <body> <main> <h1>✅ NOUVELLE VERSION EN LIGNE !</h1> <p class="version">TEST GITHUB — VERSION 999</p> <p>Si tu vois cet écran rouge, la mise à jour fonctionne.</p> <p id="date"></p> </main> <script> document.getElementById("date").textContent = "Page chargée le : " + new Date().toLocaleString("fr-FR"); </script> </body> </html>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carte interactive — Tunisie uniquement</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;color:#17323b;background:#edf5f4}
+header{padding:16px 22px;background:#fff;border-bottom:1px solid #d7e5e3}
+h1{margin:0;font-size:clamp(20px,3vw,30px)}
+header p{margin:6px 0 0;color:#587078}
+#map{height:calc(100vh - 100px);min-height:420px;background:#eaf3f5}
+.status{position:absolute;z-index:1000;left:14px;bottom:14px;max-width:calc(100% - 28px);padding:10px 13px;border-radius:10px;background:#fff;box-shadow:0 2px 12px #183b4b22;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>🇹🇳 Carte interactive de la Tunisie</h1>
+<p>Contour géographique réel — molette pour zoomer, glisser pour déplacer.</p>
+</header>
+<div id="map" role="application" aria-label="Carte affichant uniquement la Tunisie"></div>
+<div class="status" id="status">Chargement du contour de la Tunisie…</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map = L.map('map', {scrollWheelZoom:true, zoomControl:true}).setView([34,9.5],6);
+let tunisiaLayer;
+fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+.then(response => { if(!response.ok) throw new Error('Impossible de charger les données géographiques.'); return response.json(); })
+.then(data => {
+  const feature = data.features.find(f => {
+    const p = f.properties || {};
+    return p.ADMIN === 'Tunisia' || p.name === 'Tunisia' || p.NAME === 'Tunisia';
+  });
+  if(!feature) throw new Error('Contour de la Tunisie introuvable.');
+  tunisiaLayer = L.geoJSON(feature, {
+    style:{color:'#167a78',weight:2.5,opacity:1,fillColor:'#a8d9c9',fillOpacity:1}
+  }).addTo(map);
+  map.fitBounds(tunisiaLayer.getBounds(), {padding:[35,35]});
+  tunisiaLayer.bindTooltip('Tunisie', {sticky:true});
+  document.getElementById('status').textContent = 'Tunisie uniquement · Molette : zoom · Glisser : déplacement';
+})
+.catch(error => {
+  document.getElementById('status').textContent = error.message + ' Vérifiez votre connexion Internet.';
+});
+</script>
+</body>
+</html>
