@@ -1,113 +1,162 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atlas Tunisie</title>
+<title>Atlas Tunisie — Carte interactive</title>
 
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
+:root {
+  --blue: #2775e8;
+  --bg: #f4f7fb;
+  --panel: #fff;
+  --ink: #172033;
+  --muted: #64748b;
+  --line: #e3e9f2;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f3f6fa;
-  color: #18263a;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.5 system-ui, sans-serif;
 }
 
 header {
   padding: 18px 24px;
   background: white;
-  border-bottom: 1px solid #dfe6ee;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 header p {
-  margin: 5px 0 0;
-  color: #64748b;
+  margin: 3px 0 0;
+  color: var(--muted);
 }
 
-main {
-  max-width: 1500px;
-  margin: auto;
-  padding: 18px;
+.layout {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(300px, .8fr);
   gap: 16px;
+  max-width: 1500px;
+  padding: 18px;
+  margin: auto;
 }
 
 .panel {
-  background: white;
-  border: 1px solid #dfe6ee;
-  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
   overflow: hidden;
-  margin-bottom: 16px;
+  min-width: 0;
 }
 
-.panel h2, .panel h3 {
-  margin-top: 0;
+.panel-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
 }
 
-.panel-heading {
-  padding: 16px;
-  border-bottom: 1px solid #e5eaf0;
+.panel-head h2, h3 {
+  margin: 0;
+}
+
+.panel-head p {
+  color: var(--muted);
+  margin: 4px 0 0;
+  font-size: 12px;
 }
 
 #map {
-  height: 650px;
+  height: 620px;
   width: 100%;
   background: #eaf3f5;
 }
 
-.content {
-  padding: 16px;
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.controls, .chart-area, .point-list {
+  padding: 18px;
+}
+
+.controls h3, .chart-area h3, .point-list h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.field.full {
+  grid-column: 1 / -1;
 }
 
 label {
-  display: block;
+  color: var(--muted);
   font-size: 12px;
-  margin: 10px 0 5px;
-  color: #52647a;
+  font-weight: 650;
 }
 
 input {
   width: 100%;
+  min-width: 0;
   padding: 10px;
-  border: 1px solid #ccd7e3;
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid #d5deea;
+  border-radius: 9px;
+  font: inherit;
+  background: white;
+  color: #172033;
 }
 
 button {
-  padding: 10px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
+  padding: 10px 12px;
   cursor: pointer;
-  font-weight: bold;
+  font: inherit;
+  font-weight: 650;
 }
 
 .primary {
+  background: var(--blue);
   color: white;
-  background: #2775e8;
 }
 
 .secondary {
-  background: #edf2f7;
-  color: #24364b;
+  background: #eaf1fc;
+  color: #245ca7;
 }
 
 .actions {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
   margin-top: 12px;
 }
 
@@ -115,71 +164,79 @@ button {
   flex: 1;
 }
 
-#message {
+.hint, #message {
   font-size: 12px;
-  color: #536579;
-  margin-top: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
-#points {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.point {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  background: white;
-  border: 1px solid #e1e8f0;
-  color: #1e2f45;
-}
-
-.point.active {
-  background: #eaf2ff;
-  border-color: #8db7f5;
-}
-
-.point small {
-  display: block;
-  color: #64748b;
-  margin-top: 4px;
-  font-weight: normal;
-}
-
-.value {
-  color: #2168ce;
-  font-size: 12px;
-  white-space: nowrap;
+.metric {
+  font-size: 27px;
+  font-weight: 750;
+  margin: 8px 0;
 }
 
 #chart {
-  display: block;
   width: 100%;
-  height: 210px;
+  height: 190px;
+  display: block;
 }
 
-.note {
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.5;
+.point {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  margin: 3px 0;
+  color: var(--ink);
 }
 
-.city-label {
-  color: #1556a7;
-  background: #ffffffed;
+.point.active {
+  background: #edf4ff;
+  border-color: #d6e6ff;
+}
+
+.point-number {
+  background: #e3edff;
+  color: #245ca7;
+  border-radius: 8px;
+  padding: 7px;
+}
+
+.point-info {
+  flex: 1;
+}
+
+.point-coords {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.point-value {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.leaflet-tooltip.city-label {
   border: 0;
+  box-shadow: none;
+  background: #ffffffed;
+  color: #205ba8;
+  font-weight: 700;
   border-radius: 5px;
-  box-shadow: 0 1px 4px #0002;
-  font-weight: bold;
 }
 
-@media (max-width: 850px) {
-  main {
+footer {
+  color: var(--muted);
+  font-size: 11px;
+  padding: 0 18px 18px;
+}
+
+@media(max-width: 850px) {
+  .layout {
     grid-template-columns: 1fr;
     padding: 10px;
   }
@@ -188,6 +245,10 @@ button {
     height: 55vh;
     min-height: 380px;
   }
+
+  header {
+    padding: 15px;
+  }
 }
 </style>
 </head>
@@ -195,73 +256,87 @@ button {
 <body>
 
 <header>
-  <h1>⌖ Atlas Tunisie</h1>
-  <p>Carte interactive · Coordonnées géographiques · Données</p>
+  <div>
+    <h1>⌖ Atlas Tunisie</h1>
+    <p>Carte interactive · Coordonnées géographiques WGS84</p>
+  </div>
+  <strong>TUNISIE</strong>
 </header>
 
-<main>
+<main class="layout">
 
   <section class="panel">
-    <div class="panel-heading">
+    <div class="panel-head">
       <h2>Carte des points</h2>
-      <div class="note">
-        Zoomez et cliquez sur les points bleus pour consulter leurs données.
-      </div>
+      <p>Carte dédiée à la Tunisie, sans fond de carte mondial.</p>
     </div>
-    <div id="map"></div>
+    <div id="map" aria-label="Carte interactive de la Tunisie"></div>
+    <footer>
+      Cliquez sur un point bleu pour consulter ses informations.
+      Utilisez les boutons + et − pour zoomer.
+    </footer>
   </section>
 
-  <aside>
+  <aside class="right">
 
-    <section class="panel">
-      <div class="content">
-        <h3>Ajouter un point</h3>
+    <section class="panel controls">
+      <h3>Ajouter un point</h3>
 
-        <label for="name">Nom du point</label>
-        <input id="name" value="Nouveau point">
-
-        <label for="lat">Latitude</label>
-        <input id="lat" type="number" step="any"
-               placeholder="Ex. 36.8065">
-
-        <label for="lon">Longitude</label>
-        <input id="lon" type="number" step="any"
-               placeholder="Ex. 10.1815">
-
-        <div class="actions">
-          <button class="primary" id="add">Ajouter le point</button>
-          <button class="secondary" id="importButton">Importer CSV</button>
+      <div class="fields">
+        <div class="field full">
+          <label for="name">Nom du point</label>
+          <input id="name" value="Nouveau point"
+                 maxlength="80">
         </div>
 
-        <input id="csvFile" type="file" accept=".csv,text/csv"
+        <div class="field">
+          <label for="lat">Latitude</label>
+          <input id="lat" type="number" step="any"
+                 placeholder="36.8065">
+        </div>
+
+        <div class="field">
+          <label for="lon">Longitude</label>
+          <input id="lon" type="number" step="any"
+                 placeholder="10.1815">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="add">+ Ajouter le point</button>
+        <button class="secondary" id="import">Importer CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv"
                hidden>
-
-        <div id="message" aria-live="polite"></div>
-
-        <p class="note">
-          Coordonnées en degrés décimaux. Le CSV doit contenir les
-          colonnes : nom,latitude,longitude,valeur.
-        </p>
       </div>
+
+      <p class="hint">
+        Le fichier CSV doit contenir les colonnes :
+        nom,latitude,longitude,valeur.
+      </p>
+      <div id="message" role="status"></div>
     </section>
 
     <section class="panel">
-      <div class="content">
-        <h3 id="chartTitle">Indicateur — Tunis</h3>
-        <div id="chartValue" style="font-size:26px;font-weight:bold">
-          72,4
-        </div>
-        <p class="note">Évolution illustrative de 2021 à 2025</p>
-        <svg id="chart" viewBox="0 0 420 210"
-             preserveAspectRatio="none"></svg>
+      <div class="chart-area">
+        <h3 id="chartTitle">Tunis — indicateur</h3>
+        <div id="chartCoords" class="hint"></div>
+        <div class="metric" id="metric">72,4</div>
+        <svg id="chart" viewBox="0 0 420 190"
+             role="img" aria-label="Graphique de l'indicateur">
+          <g id="chartDraw"></g>
+        </svg>
+        <p class="hint">Valeurs de démonstration · 2021–2025</p>
       </div>
-    </section>
 
-    <section class="panel">
-      <div class="content">
-        <h3>Points enregistrés <span id="count"></span></h3>
+      <div class="point-list">
+        <h3>Points enregistrés (<span id="count">0</span>)</h3>
         <div id="points"></div>
       </div>
+
+      <footer>
+        Les indicateurs initiaux sont fictifs. Importez vos propres
+        données pour les remplacer.
+      </footer>
     </section>
 
   </aside>
@@ -271,305 +346,384 @@ button {
 
 <script>
 const points = [
-  {name:"Tunis",lat:36.8065,lon:10.1815,value:72.4,
-   series:[55,61,58,69,72.4]},
-  {name:"Bizerte",lat:37.2744,lon:9.8739,value:64.8,
-   series:[48,54,57,61,64.8]},
-  {name:"Sousse",lat:35.8256,lon:10.6370,value:81.2,
-   series:[60,65,71,76,81.2]},
-  {name:"Sfax",lat:34.7406,lon:10.7603,value:68.5,
-   series:[51,56,60,64,68.5]},
-  {name:"Tozeur",lat:33.9197,lon:8.1335,value:59.1,
-   series:[43,47,51,55,59.1]}
+  {
+    name: "Tunis",
+    lat: 36.8065,
+    lon: 10.1815,
+    value: 72.4,
+    series: [55, 61, 58, 69, 72.4]
+  },
+  {
+    name: "Bizerte",
+    lat: 37.2744,
+    lon: 9.8739,
+    value: 64.8,
+    series: [48, 54, 57, 61, 64.8]
+  },
+  {
+    name: "Sousse",
+    lat: 35.8256,
+    lon: 10.6369,
+    value: 81.2,
+    series: [60, 65, 71, 76, 81.2]
+  },
+  {
+    name: "Sfax",
+    lat: 34.7406,
+    lon: 10.7603,
+    value: 68.5,
+    series: [51, 56, 60, 64, 68.5]
+  },
+  {
+    name: "Tozeur",
+    lat: 33.9197,
+    lon: 8.1335,
+    value: 59.1,
+    series: [43, 47, 51, 55, 59.1]
+  }
 ];
 
 let selected = 0;
 const $ = id => document.getElementById(id);
 
+// Carte Leaflet sans tuiles de fond : seul le contour tunisien
+// et les points de données sont affichés.
 const map = L.map("map", {
+  scrollWheelZoom: true,
   zoomControl: true,
-  scrollWheelZoom: true
+  minZoom: 5,
+  maxZoom: 11,
+  maxBounds: [[29.2, 6.2], [38.9, 12.8]],
+  maxBoundsViscosity: 1
 }).setView([34.2, 9.5], 6);
 
-L.control.scale({imperial:false}).addTo(map);
+let countryLayer = null;
+const markersLayer = L.layerGroup().addTo(map);
 
-// Fond cartographique. Nécessite une connexion Internet.
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 18,
-  attribution: '&copy; OpenStreetMap'
-}).addTo(map);
+function showMessage(message) {
+  $("message").textContent = message;
+}
 
-const countryLayer = L.layerGroup().addTo(map);
-const markerLayer = L.layerGroup().addTo(map);
+function validCoordinates(lat, lon) {
+  return Number.isFinite(lat) &&
+    Number.isFinite(lon) &&
+    lat >= 30 &&
+    lat <= 38.8 &&
+    lon >= 7 &&
+    lon <= 12.5;
+}
 
-// Contour approximatif de secours pour éviter une carte vide
-// si le téléchargement du contour officiel échoue.
-const fallbackCoords = [
-  [37.35,9.7],[37.55,10.2],[37.1,10.5],
-  [36.8,11.1],[36.4,11.2],[35.9,11.0],
-  [35.3,11.1],[34.8,11.3],[34.2,11.2],
-  [33.7,10.9],[33.1,10.7],[32.5,10.6],
-  [31.9,10.3],[31.5,9.8],[31.2,9.3],
-  [30.8,8.8],[30.3,8.4],[30.2,8.0],
-  [31.0,7.8],[32.0,8.0],[33.0,8.1],
-  [34.0,8.2],[35.0,8.5],[35.8,8.6],
-  [36.4,8.7],[36.9,9.1]
-];
+function selectPoint(index) {
+  if (!points[index]) return;
 
-const fallback = L.polygon(fallbackCoords, {
-  color: "#167a78",
-  weight: 2,
-  fillColor: "#b9ded2",
-  fillOpacity: 0.75
-}).addTo(countryLayer);
+  selected = index;
+  const p = points[index];
 
-map.fitBounds(fallback.getBounds(), {padding:[20,20]});
+  $("chartTitle").textContent = p.name + " — indicateur";
+  $("chartCoords").textContent =
+    p.lat.toFixed(4) + "° N · " +
+    p.lon.toFixed(4) + "° E";
 
-function message(text) {
-  $("message").textContent = text;
+  $("metric").textContent =
+    p.value.toLocaleString("fr-FR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    });
+
+  renderChart(p.series);
+  renderList();
+  renderMarkers();
 }
 
 function renderMarkers() {
-  markerLayer.clearLayers();
+  markersLayer.clearLayers();
 
   points.forEach((p, i) => {
-    if (p.lat < 30 || p.lat > 38.8 ||
-        p.lon < 7 || p.lon > 12.5) return;
+    if (!validCoordinates(p.lat, p.lon)) return;
 
-    const marker = L.circleMarker([p.lat,p.lon], {
-      radius: i === selected ? 8 : 6,
+    const marker = L.circleMarker([p.lat, p.lon], {
+      radius: i === selected ? 9 : 6,
       color: "#ffffff",
       weight: 2,
       fillColor: "#2775e8",
       fillOpacity: 1
-    }).addTo(markerLayer);
+    }).addTo(markersLayer);
 
     marker.bindTooltip(p.name, {
       permanent: true,
       direction: "top",
-      offset: [0,-7],
+      offset: [0, -7],
       className: "city-label"
     });
 
+    marker.bindPopup(
+      "<strong>" + escapeHtml(p.name) + "</strong><br>" +
+      "Latitude : " + p.lat.toFixed(5) + "<br>" +
+      "Longitude : " + p.lon.toFixed(5) + "<br>" +
+      "Indicateur : " +
+      p.value.toLocaleString("fr-FR")
+    );
+
     marker.on("click", () => selectPoint(i));
   });
-
-  $("count").textContent = "(" + points.length + ")";
 }
 
 function renderList() {
   const root = $("points");
-  root.innerHTML = "";
+  root.replaceChildren();
 
   points.forEach((p, i) => {
     const button = document.createElement("button");
     button.className = "point" + (i === selected ? " active" : "");
 
-    const name = document.createElement("span");
+    const number = document.createElement("span");
+    number.className = "point-number";
+    number.textContent = String(i + 1).padStart(2, "0");
+
+    const info = document.createElement("span");
+    info.className = "point-info";
+
+    const name = document.createElement("strong");
     name.textContent = p.name;
 
-    const coords = document.createElement("small");
-    coords.textContent = p.lat.toFixed(4) + ", " + p.lon.toFixed(4);
-    name.appendChild(coords);
+    const coords = document.createElement("div");
+    coords.className = "point-coords";
+    coords.textContent =
+      p.lat.toFixed(4) + ", " + p.lon.toFixed(4);
+
+    info.append(name, coords);
 
     const value = document.createElement("span");
-    value.className = "value";
-    value.textContent = Number(p.value).toLocaleString("fr-FR", {
+    value.className = "point-value";
+    value.textContent = p.value.toLocaleString("fr-FR", {
       maximumFractionDigits: 1
     });
 
-    button.append(name, value);
+    button.append(number, info, value);
     button.addEventListener("click", () => {
       selectPoint(i);
-      map.setView([p.lat,p.lon], Math.max(map.getZoom(),7));
+      map.setView([p.lat, p.lon], Math.max(map.getZoom(), 7));
     });
 
     root.appendChild(button);
   });
+
+  $("count").textContent = points.length;
 }
 
 function renderChart(values) {
-  const svg = $("chart");
-  svg.innerHTML = "";
+  const root = $("chartDraw");
+  root.replaceChildren();
 
-  const width = 420, height = 210;
-  const pad = {left:35,right:12,top:15,bottom:30};
-  const min = Math.min(...values) - 5;
-  const max = Math.max(...values) + 5;
-
-  const x = i => pad.left +
-    i * (width-pad.left-pad.right)/(values.length-1);
-
-  const y = v => pad.top +
-    (max-v)*(height-pad.top-pad.bottom)/(max-min);
+  if (!values || values.length === 0) return;
 
   const ns = "http://www.w3.org/2000/svg";
+  const width = 420;
+  const height = 190;
+  const pad = { left: 34, right: 12, top: 15, bottom: 28 };
 
-  for (let i=0; i<4; i++) {
-    const yy = pad.top + i*(height-pad.top-pad.bottom)/3;
-    const line = document.createElementNS(ns,"line");
-    line.setAttribute("x1",pad.left);
-    line.setAttribute("x2",width-pad.right);
-    line.setAttribute("y1",yy);
-    line.setAttribute("y2",yy);
-    line.setAttribute("stroke","#dce5ef");
-    line.setAttribute("stroke-dasharray","4 4");
-    svg.appendChild(line);
+  const min = Math.floor(Math.min(...values) / 10) * 10 - 5;
+  const max = Math.ceil(Math.max(...values) / 10) * 10 + 5;
+
+  const X = i => pad.left +
+    i * (width - pad.left - pad.right) /
+    Math.max(1, values.length - 1);
+
+  const Y = v => pad.top +
+    (max - v) * (height - pad.top - pad.bottom) /
+    Math.max(1, max - min);
+
+  function add(tag, attrs, text) {
+    const el = document.createElementNS(ns, tag);
+
+    Object.entries(attrs).forEach(([key, value]) => {
+      el.setAttribute(key, value);
+    });
+
+    if (text !== undefined) el.textContent = text;
+    root.appendChild(el);
+    return el;
   }
 
-  const path = document.createElementNS(ns,"path");
-  path.setAttribute("d",values.map((v,i)=>
-    (i ? "L" : "M") + x(i) + " " + y(v)
-  ).join(" "));
-  path.setAttribute("fill","none");
-  path.setAttribute("stroke","#2775e8");
-  path.setAttribute("stroke-width","3");
-  path.setAttribute("stroke-linejoin","round");
-  svg.appendChild(path);
+  for (let i = 0; i < 4; i++) {
+    const y = pad.top +
+      i * (height - pad.top - pad.bottom) / 3;
 
-  values.forEach((v,i) => {
-    const circle = document.createElementNS(ns,"circle");
-    circle.setAttribute("cx",x(i));
-    circle.setAttribute("cy",y(v));
-    circle.setAttribute("r","4");
-    circle.setAttribute("fill","#2775e8");
-    svg.appendChild(circle);
+    add("line", {
+      x1: pad.left,
+      x2: width - pad.right,
+      y1: y,
+      y2: y,
+      stroke: "#dfe6ef",
+      "stroke-dasharray": "4 4"
+    });
 
-    const label = document.createElementNS(ns,"text");
-    label.setAttribute("x",x(i));
-    label.setAttribute("y",height-8);
-    label.setAttribute("text-anchor","middle");
-    label.setAttribute("font-size","11");
-    label.setAttribute("fill","#64748b");
-    label.textContent = 2021+i;
-    svg.appendChild(label);
+    add("text", {
+      x: 0,
+      y: y + 4,
+      fill: "#64748b",
+      "font-size": 10
+    }, String(Math.round(max - i * (max - min) / 3)));
+  }
+
+  const line = values.map((v, i) =>
+    (i ? "L" : "M") + X(i) + " " + Y(v)
+  ).join(" ");
+
+  const area = line +
+    " L " + X(values.length - 1) + " " + (height - pad.bottom) +
+    " L " + X(0) + " " + (height - pad.bottom) + " Z";
+
+  add("path", {
+    d: area,
+    fill: "#2775e8",
+    opacity: ".10"
+  });
+
+  add("path", {
+    d: line,
+    fill: "none",
+    stroke: "#2775e8",
+    "stroke-width": 3,
+    "stroke-linejoin": "round",
+    "stroke-linecap": "round"
+  });
+
+  values.forEach((v, i) => {
+    add("circle", {
+      cx: X(i),
+      cy: Y(v),
+      r: 4,
+      fill: "white",
+      stroke: "#2775e8",
+      "stroke-width": 2
+    });
+
+    add("text", {
+      x: X(i),
+      y: height - 8,
+      "text-anchor": "middle",
+      fill: "#64748b",
+      "font-size": 10
+    }, String(2021 + i));
   });
 }
 
-function selectPoint(i) {
-  selected = i;
-  const p = points[i];
-
-  $("chartTitle").textContent = "Indicateur — " + p.name;
-  $("chartValue").textContent = Number(p.value).toLocaleString("fr-FR", {
-    minimumFractionDigits:1,
-    maximumFractionDigits:1
-  });
-
-  renderMarkers();
-  renderList();
-  renderChart(p.series);
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
 
 $("add").addEventListener("click", () => {
-  const name = $("name").value.trim() || "Point " + (points.length+1);
-  const latText = $("lat").value;
-  const lonText = $("lon").value;
-  const lat = Number(latText);
-  const lon = Number(lonText);
+  const name = $("name").value.trim() ||
+    "Point " + (points.length + 1);
 
-  if (latText === "" || lonText === "" ||
-      !Number.isFinite(lat) || !Number.isFinite(lon)) {
-    message("Saisissez une latitude et une longitude valides.");
+  const lat = Number($("lat").value);
+  const lon = Number($("lon").value);
+
+  if ($("lat").value === "" || $("lon").value === "") {
+    showMessage("Veuillez saisir la latitude et la longitude.");
     return;
   }
 
-  if (lat < 30 || lat > 38.8 || lon < 7 || lon > 12.5) {
-    message("Ces coordonnées semblent hors de la zone tunisienne.");
+  if (!validCoordinates(lat, lon)) {
+    showMessage("Coordonnées hors de la zone prévue pour la Tunisie.");
     return;
   }
-
-  const value = 50 + Math.random()*45;
 
   points.push({
-    name,lat,lon,value,
-    series:[40,45,52,58,value].map(v =>
-      Math.round(v*10)/10
-    )
+    name,
+    lat,
+    lon,
+    value: 0,
+    series: [0, 0, 0, 0, 0]
   });
 
   $("lat").value = "";
   $("lon").value = "";
-  message("Point ajouté à la carte.");
-  selectPoint(points.length-1);
-  map.setView([lat,lon],Math.max(map.getZoom(),7));
+
+  selectPoint(points.length - 1);
+  map.setView([lat, lon], Math.max(map.getZoom(), 7));
+  showMessage("Point ajouté avec succès.");
 });
 
-$("importButton").addEventListener("click", () => {
-  $("csvFile").click();
-});
+$("import").addEventListener("click", () => $("file").click());
 
-$("csvFile").addEventListener("change", async event => {
+$("file").addEventListener("change", async event => {
   const file = event.target.files[0];
   if (!file) return;
 
-  const text = await file.text();
-  const rows = text.trim().split(/\r?\n/);
-  let start = 0;
+  try {
+    const content = await file.text();
+    const rows = content.trim().split(/\r?\n/);
 
-  if (rows[0] && /nom|name|latitude|longitude/i.test(rows[0])) {
-    start = 1;
-  }
-
-  let added = 0;
-
-  rows.slice(start).forEach(row => {
-    // Accepte les séparateurs virgule, point-virgule ou tabulation.
-    const columns = row.split(/[;,\t]/)
-      .map(s => s.trim().replace(/^"|"$/g,""));
-
-    if (columns.length < 3) return;
-
-    const name = columns[0] || "Point importé";
-    const lat = Number(columns[1]);
-    const lon = Number(columns[2]);
-    const value = Number(columns[3]) || 50;
-
-    if (columns[1] === "" || columns[2] === "" ||
-        !Number.isFinite(lat) || !Number.isFinite(lon) ||
-        lat < 30 || lat > 38.8 || lon < 7 || lon > 12.5) {
+    if (rows.length < 2) {
+      showMessage("Le fichier CSV ne contient aucune donnée.");
       return;
     }
 
-    points.push({
-      name,lat,lon,value,
-      series:[value*.72,value*.8,value*.9,value*.96,value]
+    // Accepte une première ligne d'en-tête :
+    // nom,latitude,longitude,valeur
+    let added = 0;
+
+    rows.slice(1).forEach(row => {
+      const columns = row.split(/[;,\t]/).map(s => s.trim());
+
+      if (columns.length < 3) return;
+
+      const name = columns[0] || "Point importé";
+      const lat = Number(columns[1]);
+      const lon = Number(columns[2]);
+      const value = columns[3] === undefined ||
+        columns[3] === "" ? 0 : Number(columns[3]);
+
+      if (!validCoordinates(lat, lon) ||
+          !Number.isFinite(value)) return;
+
+      points.push({
+        name,
+        lat,
+        lon,
+        value,
+        series: [value * .72, value * .8, value * .9,
+                 value * .96, value]
+      });
+
+      added++;
     });
-    added++;
-  });
 
-  if (added) {
-    message(added + " point(s) importé(s).");
-    selectPoint(points.length-1);
+    if (added) {
+      selectPoint(points.length - 1);
 
-    const valid = points.filter(p =>
-      p.lat >= 30 && p.lat <= 38.8 &&
-      p.lon >= 7 && p.lon <= 12.5
-    );
+      const last = points[points.length - 1];
+      map.setView([last.lat, last.lon], Math.max(map.getZoom(), 7));
 
-    if (valid.length) {
-      map.fitBounds(
-        L.latLngBounds(valid.map(p => [p.lat,p.lon])),
-        {padding:[25,25],maxZoom:7}
-      );
+      showMessage(added + " point(s) importé(s).");
+    } else {
+      showMessage("Aucune ligne valide. Vérifiez le format du CSV.");
     }
-  } else {
-    message("Aucune ligne valide. Vérifiez les colonnes du CSV.");
+  } catch (error) {
+    showMessage("Impossible de lire le fichier CSV.");
+  } finally {
+    event.target.value = "";
   }
-
-  event.target.value = "";
 });
 
-// Essaye de charger le contour géographique de la Tunisie.
-// En cas d'échec, le polygone simplifié reste visible.
+// Charge uniquement le contour géographique de la Tunisie.
+// Aucun fond mondial OpenStreetMap n'est ajouté.
 fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson")
   .then(response => {
     if (!response.ok) throw new Error("Contour indisponible");
     return response.json();
   })
   .then(data => {
-    const tunisia = data.features.find(f => {
-      const p = f.properties || {};
+    const tunisia = data.features.find(feature => {
+      const p = feature.properties || {};
       return p.ADMIN === "Tunisia" ||
              p.name === "Tunisia" ||
              p.NAME === "Tunisia";
@@ -577,24 +731,30 @@ fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/coun
 
     if (!tunisia) throw new Error("Tunisie introuvable");
 
-    countryLayer.clearLayers();
-
-    const country = L.geoJSON(tunisia, {
+    countryLayer = L.geoJSON(tunisia, {
       style: {
-        color:"#167a78",
-        weight:2.5,
-        fillColor:"#b9ded2",
-        fillOpacity:0.75
+        color: "#167a78",
+        weight: 2.5,
+        fillColor: "#a8d9c9",
+        fillOpacity: 1
       }
-    }).addTo(countryLayer);
+    }).addTo(map);
 
-    map.fitBounds(country.getBounds(), {padding:[20,20]});
+    map.fitBounds(countryLayer.getBounds(), {
+      padding: [25, 25]
+    });
+
+    renderMarkers();
   })
   .catch(() => {
-    message("Contour simplifié utilisé. Les points restent disponibles.");
+    showMessage(
+      "Le contour géographique n'a pas pu être chargé. " +
+      "Vérifiez votre connexion Internet."
+    );
   });
 
 selectPoint(0);
 </script>
+
 </body>
 </html>
