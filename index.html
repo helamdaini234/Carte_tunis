@@ -168,6 +168,13 @@ input {
         width: 100%;
     }
 }
+
+#tableauCapacite th, #tableauCapacite td {
+    padding: 7px;
+    border: 1px solid #ccd4dc;
+}
+#tableauCapacite tbody tr:nth-child(even) { background: #f3f5f7; }
+
 </style>
 </head>
 
@@ -203,6 +210,31 @@ input {
         <p id="details">
             Cliquez sur une région pour afficher ses informations.
         </p>
+
+        <div id="tableauCapacite" style="display:none; overflow-x:auto; margin:12px 0;">
+            <h4 style="color:#173b57; margin:12px 0 8px;">Suivi de la capacité d'accueil</h4>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;">
+                <thead>
+                    <tr style="background:#173b57; color:white;">
+                        <th style="padding:8px; border:1px solid #ccd4dc;">Date</th>
+                        <th style="padding:8px; border:1px solid #ccd4dc;">Capacité attribuée (Cexploitation + Créservée)</th>
+                        <th style="padding:8px; border:1px solid #ccd4dc;">Crestante</th>
+                        <th style="padding:8px; border:1px solid #ccd4dc;">Ctotale</th>
+                    </tr>
+                </thead>
+                <tbody style="background:#fff;">
+                    <tr style="background:#f3f5f7;"><td style="padding:7px; border:1px solid #ccd4dc;">11/5/2026</td><td>40</td><td>60</td><td>100</td></tr>
+                    <tr><td>2/5/2027</td><td>40</td><td>60</td><td>100</td></tr>
+                    <tr><td>5/5/2027</td><td>40</td><td>60</td><td>100</td></tr>
+                    <tr><td>8/5/2027</td><td>40</td><td>60</td><td>100</td></tr>
+                    <tr><td>11/5/2027</td><td>50</td><td>50</td><td>100</td></tr>
+                    <tr><td>2/5/2028</td><td>50</td><td>50</td><td>100</td></tr>
+                    <tr><td>5/5/2028</td><td>80</td><td>20</td><td>100</td></tr>
+                    <tr><td>8/5/2028</td><td>80</td><td>20</td><td>100</td></tr>
+                    <tr><td>11/5/2028</td><td>100</td><td>0</td><td>100</td></tr>
+                </tbody>
+            </table>
+        </div>
 
         <p id="message">Chargement des données...</p>
 
@@ -526,6 +558,7 @@ function afficherRegion(nomRegion) {
     regionSelectionnee = nomRegion;
 
     document.getElementById("imageGraphiqueRegion").style.display = "block";
+    document.getElementById("tableauCapacite").style.display = "block";
 
     supprimerLabelsRegions();
     coucheVilles.clearLayers();
@@ -568,6 +601,7 @@ function afficherRegion(nomRegion) {
 
 function afficherVille(ville) {
 
+    document.getElementById("tableauCapacite").style.display = "none";
     document.getElementById("titrePanneau").textContent =
         ville.nom;
 
@@ -594,6 +628,7 @@ function retourRegions() {
     regionSelectionnee = null;
 
     document.getElementById("imageGraphiqueRegion").style.display = "none";
+    document.getElementById("tableauCapacite").style.display = "none";
 
     coucheVilles.clearLayers();
 
