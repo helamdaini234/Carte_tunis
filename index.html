@@ -201,7 +201,7 @@ input {
         <h3 id="titrePanneau">Informations</h3>
 
         <p id="details">
-            Cliquez sur une région pour afficher ses villes.
+            Cliquez sur une région pour afficher ses informations.
         </p>
 
         <p id="message">Chargement des données...</p>
@@ -547,36 +547,11 @@ function afficherRegion(nomRegion) {
         });
     }
 
-    // Afficher toutes les localités de la région
-
-    villesRegion.forEach(ville => {
-
-        const marqueur = L.marker(
-            [ville.lat, ville.lng],
-            {
-                icon: L.divIcon({
-                    className: "",
-                    html: `<div class="city-label">${echapperHTML(ville.nom)}</div>`,
-                    iconSize: null,
-                    iconAnchor: [-3, 8]
-                })
-            }
-        );
-
-        marqueur.addTo(coucheVilles);
-
-        marqueur.on("click", function() {
-            afficherVille(ville);
-        });
-
-        marqueur.bindTooltip(
-            ville.nom,
-            { direction: "top" }
-        );
-    });
+    // Les marqueurs des villes/localités ne sont plus affichés
+    // lors de la sélection d'une région.
 
     document.getElementById("message").textContent =
-        villesRegion.length + " localités affichées sur la carte.";
+        "Région sélectionnée. Les villes et localités ne sont pas affichées.";
 }
 
 // ==========================================
@@ -620,7 +595,7 @@ function retourRegions() {
         "Informations";
 
     document.getElementById("details").textContent =
-        "Cliquez sur une région pour afficher ses villes.";
+        "Cliquez sur une région pour afficher ses informations.";
 
     document.getElementById("message").textContent =
         "Vue générale de la Tunisie.";
@@ -817,7 +792,7 @@ async function initialiserCarte() {
 
         document.getElementById("message").textContent =
             donneesVilles.length +
-            " localités chargées. Cliquez sur une région.";
+            " localités chargées. Cliquez sur une région pour afficher ses informations.";
 
     } catch (erreur) {
 
