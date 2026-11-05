@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carte interactive de la Tunisie</title>
+<title>Carte Interactive de la capacité d'accueil du réseau électrique de transport</title>
 
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -515,7 +515,7 @@ function echapperHTML(texte) {
 
 function afficherRegion(nomRegion) {
 
-    regionSelectionnee = nomRegion;
+    regionSelectionnee = "Gabes";
 
     document.getElementById("imageGraphiqueRegion").style.display = "block";
     document.getElementById("tableauCapacite").style.display = "block";
@@ -531,7 +531,7 @@ function afficherRegion(nomRegion) {
         nomRegion;
 
     document.getElementById("details").textContent =
-        "Informations sur la région " + nomRegion + ".";
+        "Informations sur la zone de Gabes";
 
     const couches = couchesRegions[nomRegion];
 
