@@ -3,331 +3,279 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Carte interactive de la Tunisie</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Leaflet : carte interactive -->
 <link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Chart.js : graphiques -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f1f4f8;
+    font-family: Arial;
+    background: #f2f5f9;
 }
 
 header {
     background: #17365d;
     color: white;
-    padding: 15px;
     text-align: center;
-}
-
-header h2 {
-    margin: 0;
+    padding: 15px;
 }
 
 .container {
     display: flex;
-    height: calc(100vh - 65px);
+    height: calc(100vh - 60px);
 }
 
-.left-panel {
+.map-area {
     width: 68%;
     padding: 15px;
 }
 
-.right-panel {
-    width: 32%;
-    background: white;
-    padding: 20px;
-    border-left: 2px solid #ddd;
-}
-
 #map {
     width: 100%;
-    height: 75%;
-    border-radius: 10px;
+    height: 90%;
+    background: #eaf2f8;
     border: 2px solid #ccc;
+    border-radius: 10px;
+}
+
+.panel {
+    width: 32%;
+    padding: 20px;
+    background: white;
+    border-left: 1px solid #ddd;
 }
 
 .controls {
+    padding: 10px;
     background: white;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 8px;
+    margin-bottom: 10px;
 }
 
 input {
-    width: 130px;
-    padding: 9px;
-    margin: 5px;
-    border: 1px solid #bbb;
-    border-radius: 5px;
+    padding: 8px;
+    width: 120px;
 }
 
 button {
-    padding: 10px 15px;
     background: #1769d2;
     color: white;
     border: none;
-    border-radius: 5px;
+    padding: 9px;
     cursor: pointer;
 }
 
-button:hover {
-    background: #104b9b;
-}
-
-#coordinates {
-    color: #1769d2;
+#coordonnees {
+    color: blue;
     font-weight: bold;
-    margin-top: 10px;
 }
 
-.right-panel h3 {
-    color: #17365d;
-}
-
-#chartContainer {
-    margin-top: 30px;
-}
-
-#info {
-    color: #666;
-    font-size: 14px;
-}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h2>Carte interactive de la Tunisie</h2>
+<h2>Carte interactive de la Tunisie</h2>
 </header>
 
 <div class="container">
 
-    <!-- Partie gauche : Carte -->
-    <div class="left-panel">
+<div class="map-area">
 
-        <div class="controls">
-            <strong>Ajouter un point géographique :</strong>
-            <br>
+<div class="controls">
+Latitude :
+<input type="number" id="lat" step="any">
 
-            <input type="number" id="lat"
-            placeholder="Latitude" step="any">
+Longitude :
+<input type="number" id="lng" step="any">
 
-            <input type="number" id="lng"
-            placeholder="Longitude" step="any">
+<button onclick="ajouterPoint()">Ajouter</button>
 
-            <button onclick="addPoint()">
-                Ajouter le point
-            </button>
+<p id="coordonnees">Aucune coordonnée sélectionnée</p>
+</div>
 
-            <div id="coordinates">
-                Coordonnées : aucune sélection
-            </div>
-        </div>
+<div id="map"></div>
 
-        <div id="map"></div>
+</div>
 
-        <p id="info">
-            Cliquez sur la carte pour sélectionner un emplacement
-            ou ajoutez des coordonnées manuellement.
-        </p>
+<div class="panel">
 
-    </div>
+<h3>Informations géographiques</h3>
 
-    <!-- Partie droite : Graphique -->
-    <div class="right-panel">
+<p id="nomPoint">Sélectionnez un point bleu</p>
 
-        <h3>Informations du point sélectionné</h3>
+<p id="details"></p>
 
-        <p id="pointName">Aucun point sélectionné</p>
+<canvas id="graphique"></canvas>
 
-        <p id="pointCoordinates">
-            Latitude : -- <br>
-            Longitude : --
-        </p>
-
-        <div id="chartContainer">
-            <canvas id="myChart"></canvas>
-        </div>
-
-    </div>
-
+</div>
 </div>
 
 <script>
 
-// Création de la carte centrée sur la Tunisie
-var map = L.map('map', {
-    maxBounds: [
-        [29.0, 6.5],
-        [38.0, 12.5]
-    ],
-    maxBoundsViscosity: 1.0
-}).setView([34.0, 9.5], 6);
-
-// Fond de carte
-L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution: '&copy; OpenStreetMap'
-    }
-).addTo(map);
-
-// Icône bleue personnalisée
-var blueIcon = new L.Icon({
-    iconUrl:
-    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-    shadowUrl:
-    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+// Carte sans fond mondial
+const map = L.map('map', {
+    zoomControl: true,
+    minZoom: 6,
+    maxZoom: 15,
+    maxBounds: [[29, 6], [38, 12]],
+    maxBoundsViscosity: 1
 });
 
-var markers = [];
-var chart = null;
-var pointNumber = 0;
+// Charger les frontières des gouvernorats tunisiens
+fetch(
+'https://raw.githubusercontent.com/riatelab/tunisie/master/data/TN-gouvernorats.geojson'
+)
+.then(response => {
+    if (!response.ok) throw new Error("Erreur de chargement");
+    return response.json();
+})
+.then(data => {
 
-// Ajouter un point sur la carte
-function addPoint() {
+    const couche = L.geoJSON(data, {
+        style: {
+            color: '#17365d',
+            weight: 1.5,
+            fillColor: '#dceaf5',
+            fillOpacity: 1
+        },
 
-    var lat = parseFloat(document.getElementById("lat").value);
-    var lng = parseFloat(document.getElementById("lng").value);
+        onEachFeature: function(feature, layer) {
 
-    if (
-        !Number.isFinite(lat) ||
+            const nom =
+                feature.properties.NAME_1 ||
+                feature.properties.name ||
+                feature.properties.nom ||
+                "Gouvernorat";
+
+            layer.bindTooltip(nom, {
+                sticky: true
+            });
+
+            layer.on('mouseover', function() {
+                layer.setStyle({
+                    fillColor: '#a9cce8'
+                });
+            });
+
+            layer.on('mouseout', function() {
+                couche.resetStyle(layer);
+            });
+        }
+    }).addTo(map);
+
+    map.fitBounds(couche.getBounds());
+
+})
+.catch(error => {
+    alert("Impossible de charger la carte de Tunisie.");
+    console.error(error);
+});
+
+// Marqueurs
+let numero = 0;
+let graphique = null;
+
+function ajouterPoint() {
+
+    const lat = parseFloat(
+        document.getElementById('lat').value
+    );
+
+    const lng = parseFloat(
+        document.getElementById('lng').value
+    );
+
+    if (!Number.isFinite(lat) ||
         !Number.isFinite(lng) ||
-        lat < 29 || lat > 38 ||
-        lng < 6.5 || lng > 12.5
-    ) {
-        alert("Veuillez entrer des coordonnées valides en Tunisie.");
+        lat < 30 || lat > 37.5 ||
+        lng < 7 || lng > 12) {
+
+        alert("Coordonnées hors de la Tunisie");
         return;
     }
 
-    createMarker(lat, lng);
+    numero++;
 
-    map.setView([lat, lng], 10);
-}
-
-// Création du marqueur bleu
-function createMarker(lat, lng) {
-
-    pointNumber++;
-
-    var marker = L.marker([lat, lng], {
-        icon: blueIcon
-    }).addTo(map);
-
-    marker.bindPopup("Point " + pointNumber);
-
-    var point = {
-        id: pointNumber,
+    const point = {
+        id: numero,
         lat: lat,
-        lng: lng,
-        marker: marker
+        lng: lng
     };
 
-    markers.push(point);
+    const marqueur = L.circleMarker(
+        [lat, lng],
+        {
+            radius: 8,
+            color: 'blue',
+            fillColor: '#1685ff',
+            fillOpacity: 1
+        }
+    ).addTo(map);
 
-    marker.on('click', function() {
-        showGraph(point);
+    marqueur.bindPopup("Point " + numero);
+
+    marqueur.on('click', function() {
+        afficherGraphique(point);
     });
 
-    showGraph(point);
+    map.setView([lat, lng], 10);
+
+    afficherGraphique(point);
 }
 
-// Ajouter un point directement en cliquant sur la carte
-map.on('click', function(e) {
+// Sélection d'un point
+function afficherGraphique(point) {
 
-    var lat = e.latlng.lat;
-    var lng = e.latlng.lng;
+    document.getElementById('nomPoint').innerText =
+        "Point " + point.id;
 
-    document.getElementById("lat").value = lat.toFixed(6);
-    document.getElementById("lng").value = lng.toFixed(6);
-
-    document.getElementById("coordinates").innerHTML =
-        "Latitude : " + lat.toFixed(6) +
-        " | Longitude : " + lng.toFixed(6);
-
-});
-
-// Afficher les coordonnées et le graphique
-function showGraph(point) {
-
-    document.getElementById("pointName").innerHTML =
-        "<strong>Point " + point.id + "</strong>";
-
-    document.getElementById("pointCoordinates").innerHTML =
+    document.getElementById('details').innerHTML =
         "Latitude : " + point.lat.toFixed(6) +
         "<br>Longitude : " + point.lng.toFixed(6);
 
-    document.getElementById("coordinates").innerHTML =
+    document.getElementById('coordonnees').innerText =
         "Latitude : " + point.lat.toFixed(6) +
         " | Longitude : " + point.lng.toFixed(6);
 
-    // Données de démonstration
-    var values = [
-        12, 18, 15, 25, 20, 30, 27
-    ];
-
-    var labels = [
-        "Janvier", "Février", "Mars",
-        "Avril", "Mai", "Juin", "Juillet"
-    ];
-
-    if (chart) {
-        chart.destroy();
+    if (graphique) {
+        graphique.destroy();
     }
 
-    chart = new Chart(
-        document.getElementById("myChart"),
+    graphique = new Chart(
+        document.getElementById('graphique'),
         {
-            type: "line",
+            type: 'line',
 
             data: {
-                labels: labels,
+                labels: [
+                    'Janvier', 'Février', 'Mars',
+                    'Avril', 'Mai', 'Juin', 'Juillet'
+                ],
 
                 datasets: [{
-                    label: "Valeurs du point",
-                    data: values,
-
-                    borderColor: "#1769d2",
-                    backgroundColor: "rgba(23,105,210,0.15)",
-                    borderWidth: 3,
+                    label: 'Valeurs du point',
+                    data: [12, 18, 15, 25, 20, 30, 27],
+                    borderColor: '#1769d2',
+                    backgroundColor: 'rgba(23,105,210,0.15)',
                     fill: true,
-                    tension: 0.4
+                    tension: 0.3
                 }]
             },
 
             options: {
                 responsive: true,
-
                 plugins: {
-                    title: {
-                        display: true,
-                        text: "Graphique du point " + point.id
-                    }
-                },
-
-                scales: {
-                    y: {
-                        beginAtZero: true
+                    legend: {
+                        display: true
                     }
                 }
             }
