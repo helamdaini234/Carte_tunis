@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carte interactive de la Tunisie</title>
+<title>Carte Interactive de la capacité d'accueil du réseau électrique de transport</title>
 
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -206,7 +206,7 @@ button:hover {
 <body>
 
 <header>
-    <h2>Carte interactive de la Tunisie</h2>
+    <h2>Carte Interactive de la capacité d'accueil du réseau électrique de transport</h2>
 </header>
 
 <div class="conteneur panneau-ferme" id="conteneurPrincipal">\n    <button id="togglePanneau" type="button" onclick="basculerPanneau()" aria-label="Afficher le panneau" title="Afficher les tableaux et graphiques">‹</button>
@@ -601,7 +601,7 @@ function afficherRegion(nomRegion) {
         "Gabes";
 
     document.getElementById("details").textContent =
-        "Informations sur la région " + nomRegion + ".";
+        "Informations sur la région Gabes";
 
     const couches = couchesRegions[nomRegion];
 
