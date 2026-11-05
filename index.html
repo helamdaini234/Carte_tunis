@@ -1,32 +1,48 @@
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 <meta charset="UTF-8">
-<title>Carte interactive de la Tunisie</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Carte interactive de la Tunisie</title>
+
+<!-- Leaflet -->
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-* { box-sizing: border-box; }
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
-    font-family: Arial;
-    background: #f2f5f9;
+    font-family: Arial, sans-serif;
+    background: #f1f4f8;
 }
+
+/* En-tête */
 
 header {
     background: #17365d;
     color: white;
-    text-align: center;
     padding: 15px;
+    text-align: center;
 }
+
+header h2 {
+    margin: 0;
+}
+
+/* Organisation */
 
 .container {
     display: flex;
@@ -50,31 +66,89 @@ header {
     width: 32%;
     padding: 20px;
     background: white;
-    border-left: 1px solid #ddd;
+    border-left: 2px solid #ddd;
+    overflow-y: auto;
 }
 
+.panel h3 {
+    color: #17365d;
+}
+
+/* Coordonnées */
+
 .controls {
-    padding: 10px;
     background: white;
+    padding: 12px;
     margin-bottom: 10px;
+    border-radius: 8px;
 }
 
 input {
-    padding: 8px;
-    width: 120px;
+    width: 125px;
+    padding: 9px;
+    margin: 5px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
 }
 
 button {
+    padding: 10px 15px;
     background: #1769d2;
     color: white;
     border: none;
-    padding: 9px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-#coordonnees {
-    color: blue;
+button:hover {
+    background: #104b9b;
+}
+
+/* Noms des villes */
+
+.city-label {
+    color: #172b4d;
+    font-size: 12px;
     font-weight: bold;
+    white-space: nowrap;
+    text-shadow:
+        1px 1px white,
+        -1px -1px white,
+        1px -1px white,
+        -1px 1px white;
+    background: transparent;
+    border: none;
+}
+
+/* Coordonnées bleues */
+
+#coordonnees {
+    color: #1769d2;
+    font-weight: bold;
+}
+
+/* Graphique */
+
+#graphique {
+    margin-top: 20px;
+}
+
+@media(max-width: 800px) {
+
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .map-area,
+    .panel {
+        width: 100%;
+    }
+
+    #map {
+        height: 550px;
+    }
+
 }
 
 </style>
@@ -83,64 +157,116 @@ button {
 <body>
 
 <header>
-<h2>Carte interactive de la Tunisie</h2>
+    <h2>Carte interactive de la Tunisie</h2>
 </header>
 
 <div class="container">
 
-<div class="map-area">
+    <!-- CARTE -->
 
-<div class="controls">
-Latitude :
-<input type="number" id="lat" step="any">
+    <div class="map-area">
 
-Longitude :
-<input type="number" id="lng" step="any">
+        <div class="controls">
 
-<button onclick="ajouterPoint()">Ajouter</button>
+            <strong>Ajouter des coordonnées GPS :</strong>
 
-<p id="coordonnees">Aucune coordonnée sélectionnée</p>
-</div>
+            <br>
 
-<div id="map"></div>
+            Latitude :
+            <input
+                type="number"
+                id="lat"
+                placeholder="Latitude"
+                step="any"
+            >
 
-</div>
+            Longitude :
+            <input
+                type="number"
+                id="lng"
+                placeholder="Longitude"
+                step="any"
+            >
 
-<div class="panel">
+            <button onclick="ajouterPoint()">
+                Ajouter le point
+            </button>
 
-<h3>Informations géographiques</h3>
+            <p id="coordonnees">
+                Aucune coordonnée sélectionnée
+            </p>
 
-<p id="nomPoint">Sélectionnez un point bleu</p>
+        </div>
 
-<p id="details"></p>
+        <div id="map"></div>
 
-<canvas id="graphique"></canvas>
+        <p>
+            Cliquez sur la carte pour obtenir les coordonnées.
+            Cliquez sur un point bleu pour afficher son graphique.
+        </p>
 
-</div>
+    </div>
+
+    <!-- PANNEAU DROIT -->
+
+    <div class="panel">
+
+        <h3>Informations géographiques</h3>
+
+        <p id="nomPoint">
+            Sélectionnez un point bleu
+        </p>
+
+        <p id="details">
+            Latitude : -- <br>
+            Longitude : --
+        </p>
+
+        <canvas id="graphique"></canvas>
+
+    </div>
+
 </div>
 
 <script>
 
-// Carte sans fond mondial
+// ======================================
+// 1. INITIALISATION DE LA CARTE
+// ======================================
+
 const map = L.map('map', {
     zoomControl: true,
     minZoom: 6,
     maxZoom: 15,
-    maxBounds: [[29, 6], [38, 12]],
+    maxBounds: [
+        [29, 6],
+        [38, 12.5]
+    ],
     maxBoundsViscosity: 1
 });
 
-// Charger les frontières des gouvernorats tunisiens
+// ======================================
+// 2. CHARGEMENT DES FRONTIÈRES
+// ======================================
+
+let coucheTunisie;
+
 fetch(
 'https://raw.githubusercontent.com/riatelab/tunisie/master/data/TN-gouvernorats.geojson'
 )
 .then(response => {
-    if (!response.ok) throw new Error("Erreur de chargement");
+
+    if (!response.ok) {
+        throw new Error("Erreur de chargement");
+    }
+
     return response.json();
+
 })
 .then(data => {
 
-    const couche = L.geoJSON(data, {
+    coucheTunisie = L.geoJSON(data, {
+
         style: {
             color: '#17365d',
             weight: 1.5,
@@ -156,32 +282,114 @@ fetch(
                 feature.properties.nom ||
                 "Gouvernorat";
 
-            layer.bindTooltip(nom, {
-                sticky: true
-            });
+            layer.bindTooltip(nom);
 
             layer.on('mouseover', function() {
+
                 layer.setStyle({
                     fillColor: '#a9cce8'
                 });
+
             });
 
             layer.on('mouseout', function() {
-                couche.resetStyle(layer);
+
+                coucheTunisie.resetStyle(layer);
+
             });
+
         }
+
     }).addTo(map);
 
-    map.fitBounds(couche.getBounds());
+    // Zoom automatique sur la Tunisie
+
+    map.fitBounds(coucheTunisie.getBounds());
 
 })
 .catch(error => {
-    alert("Impossible de charger la carte de Tunisie.");
+
     console.error(error);
+
+    alert("Erreur : impossible de charger les frontières de la Tunisie.");
+
 });
 
-// Marqueurs
+// ======================================
+// 3. LES 24 VILLES TUNISIENNES
+// ======================================
+
+const villes = [
+
+    ["Tunis", 36.8065, 10.1815],
+    ["Ariana", 36.8625, 10.1956],
+    ["Ben Arous", 36.7531, 10.2189],
+    ["La Manouba", 36.8081, 10.0972],
+
+    ["Nabeul", 36.4513, 10.7357],
+    ["Zaghouan", 36.4029, 10.1429],
+    ["Bizerte", 37.2744, 9.8739],
+
+    ["Béja", 36.7256, 9.1817],
+    ["Jendouba", 36.5011, 8.7802],
+    ["Le Kef", 36.1742, 8.7049],
+    ["Siliana", 36.0849, 9.3708],
+
+    ["Sousse", 35.8256, 10.6084],
+    ["Monastir", 35.7770, 10.8262],
+    ["Mahdia", 35.5047, 11.0622],
+
+    ["Sfax", 34.7406, 10.7603],
+
+    ["Kairouan", 35.6781, 10.0963],
+    ["Kasserine", 35.1676, 8.8365],
+    ["Sidi Bouzid", 35.0382, 9.4858],
+
+    ["Gabès", 33.8815, 10.0982],
+    ["Médenine", 33.3549, 10.5055],
+    ["Tataouine", 32.9297, 10.4518],
+
+    ["Gafsa", 34.4250, 8.7842],
+    ["Tozeur", 33.9197, 8.1335],
+    ["Kébili", 33.7044, 8.9690]
+
+];
+
+// ======================================
+// 4. AFFICHAGE DES NOMS SUR LA CARTE
+// ======================================
+
+villes.forEach(function(ville) {
+
+    const label = L.divIcon({
+
+        className: 'city-label',
+
+        html: ville[0],
+
+        iconSize: [100, 20],
+
+        iconAnchor: [35, 10]
+
+    });
+
+    L.marker(
+        [ville[1], ville[2]],
+        {
+            icon: label,
+            interactive: false,
+            keyboard: false
+        }
+    ).addTo(map);
+
+});
+
+// ======================================
+// 5. AJOUT DES POINTS BLEUS
+// ======================================
+
 let numero = 0;
+
 let graphique = null;
 
 function ajouterPoint() {
@@ -194,93 +402,206 @@ function ajouterPoint() {
         document.getElementById('lng').value
     );
 
-    if (!Number.isFinite(lat) ||
+    if (
+        !Number.isFinite(lat) ||
         !Number.isFinite(lng) ||
         lat < 30 || lat > 37.5 ||
-        lng < 7 || lng > 12) {
+        lng < 7 || lng > 12
+    ) {
 
-        alert("Coordonnées hors de la Tunisie");
+        alert("Veuillez saisir des coordonnées valides en Tunisie.");
+
         return;
+
     }
 
     numero++;
 
     const point = {
+
         id: numero,
+
         lat: lat,
+
         lng: lng
+
     };
 
     const marqueur = L.circleMarker(
+
         [lat, lng],
+
         {
+
             radius: 8,
+
             color: 'blue',
+
             fillColor: '#1685ff',
+
             fillOpacity: 1
+
         }
+
     ).addTo(map);
 
-    marqueur.bindPopup("Point " + numero);
+    marqueur.bindPopup(
+        "Point " + numero
+    );
+
+    // Clic sur le point bleu
 
     marqueur.on('click', function() {
+
         afficherGraphique(point);
+
     });
 
     map.setView([lat, lng], 10);
 
     afficherGraphique(point);
+
 }
 
-// Sélection d'un point
+// ======================================
+// 6. CLIC SUR LA CARTE POUR COORDONNÉES
+// ======================================
+
+map.on('click', function(e) {
+
+    const lat = e.latlng.lat;
+
+    const lng = e.latlng.lng;
+
+    document.getElementById('lat').value =
+        lat.toFixed(6);
+
+    document.getElementById('lng').value =
+        lng.toFixed(6);
+
+    document.getElementById('coordonnees').innerText =
+
+        "Latitude : " + lat.toFixed(6) +
+
+        " | Longitude : " + lng.toFixed(6);
+
+});
+
+// ======================================
+// 7. AFFICHAGE DU GRAPHIQUE À DROITE
+// ======================================
+
 function afficherGraphique(point) {
 
-    document.getElementById('nomPoint').innerText =
-        "Point " + point.id;
+    document.getElementById('nomPoint').innerHTML =
+
+        "<strong>Point " + point.id + "</strong>";
 
     document.getElementById('details').innerHTML =
+
         "Latitude : " + point.lat.toFixed(6) +
+
         "<br>Longitude : " + point.lng.toFixed(6);
 
     document.getElementById('coordonnees').innerText =
+
         "Latitude : " + point.lat.toFixed(6) +
+
         " | Longitude : " + point.lng.toFixed(6);
 
+    // Données fictives de démonstration
+
+    const valeurs = [
+        12, 18, 15, 25, 20, 30, 27
+    ];
+
+    const mois = [
+
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet"
+
+    ];
+
+    // Supprimer ancien graphique
+
     if (graphique) {
+
         graphique.destroy();
+
     }
 
+    // Nouveau graphique
+
     graphique = new Chart(
+
         document.getElementById('graphique'),
+
         {
+
             type: 'line',
 
             data: {
-                labels: [
-                    'Janvier', 'Février', 'Mars',
-                    'Avril', 'Mai', 'Juin', 'Juillet'
-                ],
+
+                labels: mois,
 
                 datasets: [{
+
                     label: 'Valeurs du point',
-                    data: [12, 18, 15, 25, 20, 30, 27],
+
+                    data: valeurs,
+
                     borderColor: '#1769d2',
-                    backgroundColor: 'rgba(23,105,210,0.15)',
+
+                    backgroundColor:
+                    'rgba(23,105,210,0.15)',
+
+                    borderWidth: 3,
+
                     fill: true,
-                    tension: 0.3
+
+                    tension: 0.4
+
                 }]
+
             },
 
             options: {
+
                 responsive: true,
+
                 plugins: {
-                    legend: {
-                        display: true
+
+                    title: {
+
+                        display: true,
+
+                        text: "Graphique du point " + point.id
+
                     }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true
+
+                    }
+
                 }
+
             }
+
         }
+
     );
+
 }
 
 </script>
