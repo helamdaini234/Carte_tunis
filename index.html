@@ -89,14 +89,6 @@ button:hover {
     left: 15px;
 }
 
-input {
-    width: 100%;
-    padding: 9px;
-    margin: 5px 0 10px;
-    border: 1px solid #ccd4dc;
-    border-radius: 5px;
-}
-
 .region-label {
     background: white;
     border: 2px solid #34495e;
@@ -108,19 +100,6 @@ input {
     white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 2px 5px #0003;
-}
-
-.city-label {
-    background: white;
-    border: 1px solid #42647e;
-    border-radius: 4px;
-    padding: 3px 5px;
-    font-size: 11px;
-    font-weight: bold;
-    color: #173b57;
-    white-space: nowrap;
-    box-shadow: 0 1px 4px #0003;
-    cursor: pointer;
 }
 
 .legende {
@@ -146,12 +125,6 @@ input {
     margin-right: 6px;
     vertical-align: middle;
     border-radius: 2px;
-}
-
-#message {
-    font-size: 13px;
-    color: #526779;
-    margin: 8px 0;
 }
 
 @media(max-width: 800px) {
@@ -207,9 +180,7 @@ input {
 
         <h3 id="titrePanneau">Informations</h3>
 
-        <p id="details">
-            Cliquez sur une région pour afficher ses informations.
-        </p>
+        <p id="details"></p>
 
         <div id="tableauCapacite" style="display:none; overflow-x:auto; margin:12px 0;">
             <h4 style="color:#173b57; margin:12px 0 8px;">Suivi de la capacité d'accueil</h4>
@@ -236,24 +207,6 @@ input {
             </table>
         </div>
 
-        <p id="message">Chargement des données...</p>
-
-        <hr>
-
-        <h3>Ajouter un point GPS</h3>
-
-        <label>Latitude</label>
-        <input type="number" id="latitude" step="any"
-               placeholder="Exemple : 36.8065">
-
-        <label>Longitude</label>
-        <input type="number" id="longitude" step="any"
-               placeholder="Exemple : 10.1815">
-
-        <button onclick="ajouterPoint()">Ajouter le point bleu</button>
-
-        <hr>
-
         <h3>Graphique</h3>
         <canvas id="graphique"></canvas>
         <img
@@ -268,8 +221,6 @@ input {
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
 
@@ -293,11 +244,9 @@ const boundsTunisie = L.latLngBounds(
 map.fitBounds(boundsTunisie);
 
 const coucheVilles = L.layerGroup().addTo(map);
-const coucheGPS = L.layerGroup().addTo(map);
 
 let coucheGouvernorats;
 let marqueursRegions = [];
-let graphique = null;
 let regionSelectionnee = null;
 
 const couchesRegions = {
@@ -435,50 +384,9 @@ function regionDuGouvernorat(code) {
 // 4. CHARGEMENT DES DONNEES DES VILLES
 // ==========================================
 
-const URL_VILLES =
-"https://raw.githubusercontent.com/Alaa-Taieb/map-tunisia/main/dist/data/cities.csv";
-
 const URL_GOUVERNORATS =
 "https://raw.githubusercontent.com/Alaa-Taieb/map-tunisia/main/dist/geojson/tunisia-governorates-medium.geojson";
 
-let villes = [];
-
-async function chargerVilles() {
-
-    const reponse = await fetch(URL_VILLES);
-
-    if (!reponse.ok) {
-        throw new Error("Impossible de charger le fichier des villes.");
-    }
-
-    const csv = await reponse.text();
-
-    const resultat = Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true
-    });
-
-    villes = resultat.data
-        .map(v => {
-            const code = String(v.governorate || "").toUpperCase();
-
-            return {
-                nom: v.name_fr || v.name_en || v.name_ar || "Localité",
-                lat: Number(v.lat),
-                lng: Number(v.lon),
-                code: code,
-                region: regionDuGouvernorat(code),
-                type: v.place || "localité"
-            };
-        })
-        .filter(v =>
-            Number.isFinite(v.lat) &&
-            Number.isFinite(v.lng) &&
-            v.region
-        );
-
-    return villes;
-}
 
 // ==========================================
 // 5. STYLE DES GOUVERNORATS
@@ -568,12 +476,8 @@ function afficherRegion(nomRegion) {
     document.getElementById("titrePanneau").textContent =
         nomRegion;
 
-    const villesRegion = villes.filter(v =>
-        v.region === nomRegion
-    );
-
-    document.getElementById("details").innerHTML =
-        `<b>${villesRegion.length}</b> villes et localités répertoriées dans la région ${nomRegion}.`;
+    document.getElementById("details").textContent =
+        "Informations sur la région " + nomRegion + ".";
 
     const couches = couchesRegions[nomRegion];
 
@@ -588,35 +492,7 @@ function afficherRegion(nomRegion) {
         });
     }
 
-    // Les marqueurs des villes/localités ne sont plus affichés
-    // lors de la sélection d'une région.
-
-    document.getElementById("message").textContent =
-        "Région sélectionnée. Les villes et localités ne sont pas affichées.";
-}
-
-// ==========================================
-// 8. AFFICHER LES INFORMATIONS D'UNE VILLE
-// ==========================================
-
-function afficherVille(ville) {
-
-    document.getElementById("tableauCapacite").style.display = "none";
-    document.getElementById("titrePanneau").textContent =
-        ville.nom;
-
-    document.getElementById("details").innerHTML = `
-        <b>Ville :</b> ${echapperHTML(ville.nom)}<br><br>
-        <b>Région :</b> ${echapperHTML(ville.region)}<br><br>
-        <b>Latitude :</b> ${ville.lat}<br>
-        <b>Longitude :</b> ${ville.lng}<br><br>
-        <b>Type :</b> ${echapperHTML(ville.type)}
-    `;
-
-    document.getElementById("latitude").value = ville.lat;
-    document.getElementById("longitude").value = ville.lng;
-
-    afficherGraphique(ville.nom);
+    // Les noms des villes et localités ne sont pas affichés.
 }
 
 // ==========================================
@@ -639,11 +515,9 @@ function retourRegions() {
     document.getElementById("titrePanneau").textContent =
         "Informations";
 
-    document.getElementById("details").textContent =
-        "Cliquez sur une région pour afficher ses informations.";
-
-    document.getElementById("message").textContent =
-        "Vue générale de la Tunisie.";
+    document.getElementById("details").textContent = "";
+    document.getElementById("tableauCapacite").style.display = "none";
+    document.getElementById("imageGraphiqueRegion").style.display = "none";
 
     map.fitBounds(boundsTunisie, {
         padding: [20, 20],
@@ -654,114 +528,6 @@ function retourRegions() {
 }
 
 // ==========================================
-// 10. GRAPHIQUE
-// ==========================================
-
-function afficherGraphique(nom) {
-
-    const ctx = document.getElementById("graphique");
-
-    if (graphique) {
-        graphique.destroy();
-    }
-
-    graphique = new Chart(ctx, {
-        type: "line",
-
-        data: {
-            labels: [
-                "Janvier",
-                "Février",
-                "Mars",
-                "Avril",
-                "Mai",
-                "Juin",
-                "Juillet"
-            ],
-
-            datasets: [{
-                label: "Données de " + nom,
-                data: [12, 18, 15, 25, 20, 30, 27],
-                borderColor: "#2878b5",
-                backgroundColor: "#2878b522",
-                fill: true,
-                tension: 0.3
-            }]
-        },
-
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true
-                }
-            }
-        }
-    });
-}
-
-// ==========================================
-// 11. AJOUTER UN POINT GPS BLEU
-// ==========================================
-
-function ajouterPoint() {
-
-    const lat = Number(
-        document.getElementById("latitude").value
-    );
-
-    const lng = Number(
-        document.getElementById("longitude").value
-    );
-
-    if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng) ||
-        lat < 30 || lat > 38 ||
-        lng < 7 || lng > 12
-    ) {
-        alert("Veuillez saisir des coordonnées valides en Tunisie.");
-        return;
-    }
-
-    const point = L.circleMarker(
-        [lat, lng],
-        {
-            radius: 8,
-            color: "#0055ff",
-            fillColor: "#007bff",
-            fillOpacity: 1,
-            weight: 2
-        }
-    ).addTo(coucheGPS);
-
-    point.bindPopup(
-        `Point GPS<br>Latitude : ${lat}<br>Longitude : ${lng}`
-    );
-
-    point.on("click", function() {
-        afficherGraphique("Point GPS");
-    });
-
-    map.setView([lat, lng], 10);
-
-    point.openPopup();
-}
-
-// ==========================================
-// 12. RECUPERER LES COORDONNEES AU CLIC
-// ==========================================
-
-map.on("click", function(e) {
-
-    document.getElementById("latitude").value =
-        e.latlng.lat.toFixed(6);
-
-    document.getElementById("longitude").value =
-        e.latlng.lng.toFixed(6);
-});
-
-// ==========================================
 // 13. CHARGEMENT DE LA CARTE ET DES DONNEES
 // ==========================================
 
@@ -769,13 +535,7 @@ async function initialiserCarte() {
 
     try {
 
-        document.getElementById("message").textContent =
-            "Chargement de la carte et des localités...";
-
-        const [reponseGeo, donneesVilles] = await Promise.all([
-            fetch(URL_GOUVERNORATS),
-            chargerVilles()
-        ]);
+        const reponseGeo = await fetch(URL_GOUVERNORATS);
 
         if (!reponseGeo.ok) {
             throw new Error("Impossible de charger les gouvernorats.");
@@ -835,20 +595,9 @@ async function initialiserCarte() {
 
         afficherLabelsRegions();
 
-        document.getElementById("message").textContent =
-            donneesVilles.length +
-            " localités chargées. Cliquez sur une région pour afficher ses informations.";
-
     } catch (erreur) {
 
-        console.error(erreur);
-
-        document.getElementById("message").textContent =
-            "Erreur de chargement : " + erreur.message;
-
-        alert(
-            "Impossible de charger les données. Vérifiez votre connexion Internet."
-        );
+        console.error("Impossible de charger les données de la carte :", erreur);
     }
 }
 
