@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carte Interactive de la capacité d'accueil du réseau électrique de transport</title>
+<title>Carte interactive de la Tunisie</title>
 
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -33,14 +33,16 @@ header h2 {
 }
 
 .conteneur {
-    display: flex;
-    gap: 12px;
+    --largeur-panneau: 38%;
+    position: relative;
+    overflow: hidden;
     padding: 12px;
     height: calc(100vh - 65px);
 }
 
 .carte-zone {
-    flex: 1;
+    width: 100%;
+    height: 100%;
     min-width: 0;
     position: relative;
 }
@@ -54,13 +56,48 @@ header h2 {
 }
 
 .panneau {
-    flex: 0 0 38%;
-    width: 38%;
-    min-width: 360px;
+    position: absolute;
+    z-index: 1200;
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: var(--largeur-panneau);
+    min-width: 320px;
+    max-width: 650px;
     background: white;
+    border: 1px solid #ccd4dc;
     border-radius: 10px;
     padding: 16px;
     overflow-y: auto;
+    box-shadow: 0 4px 18px #0002;
+    transform: translateX(0);
+    transition: transform 0.35s ease;
+}
+
+#togglePanneau {
+    position: absolute;
+    z-index: 1300;
+    top: 50%;
+    right: calc(var(--largeur-panneau) + 12px);
+    transform: translateY(-50%);
+    width: 38px;
+    height: 64px;
+    padding: 0;
+    margin: 0;
+    border-radius: 8px 0 0 8px;
+    font-size: 25px;
+    line-height: 1;
+    box-shadow: 0 2px 8px #0003;
+    transition: right 0.35s ease, background 0.2s ease;
+}
+
+.conteneur.panneau-ferme .panneau {
+    transform: translateX(calc(100% + 24px));
+}
+
+.conteneur.panneau-ferme #togglePanneau {
+    right: 12px;
+    border-radius: 8px 0 0 8px;
 }
 
 .panneau h3 {
@@ -143,18 +180,17 @@ button:hover {
 
 @media(max-width: 950px) {
     .conteneur {
-        flex-direction: column;
-        height: auto;
+        --largeur-panneau: min(90%, 440px);
+        height: calc(100vh - 65px);
     }
 
     .carte-zone {
-        height: 65vh;
+        height: 100%;
     }
 
     .panneau {
-        flex: 0 0 auto;
-        width: 100%;
         min-width: 0;
+        max-width: none;
     }
 }
 
@@ -173,7 +209,7 @@ button:hover {
     <h2>Carte interactive de la Tunisie</h2>
 </header>
 
-<div class="conteneur">
+<div class="conteneur" id="conteneurPrincipal">\n    <button id="togglePanneau" type="button" onclick="basculerPanneau()" aria-label="Masquer le panneau" title="Masquer / afficher les tableaux et graphiques">‹</button>
 
     <div class="carte-zone">
 
@@ -192,7 +228,7 @@ button:hover {
 
     </div>
 
-    <aside class="panneau">
+    <aside class="panneau" id="panneauInfos">
 
         <h3 id="titrePanneau">Informations</h3>
 
@@ -275,6 +311,29 @@ button:hover {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+
+// ==========================================
+// AFFICHER / MASQUER LE PANNEAU DE DROITE
+// ==========================================
+
+function basculerPanneau() {
+    const conteneur = document.getElementById("conteneurPrincipal");
+    const bouton = document.getElementById("togglePanneau");
+    const ferme = conteneur.classList.toggle("panneau-ferme");
+
+    bouton.textContent = ferme ? "‹" : "›";
+    bouton.setAttribute(
+        "aria-label",
+        ferme ? "Afficher le panneau" : "Masquer le panneau"
+    );
+    bouton.setAttribute(
+        "title",
+        ferme ? "Afficher les tableaux et graphiques" : "Masquer les tableaux et graphiques"
+    );
+
+    // Leaflet recalcule la taille de la carte après le déplacement du panneau.
+    setTimeout(() => map.invalidateSize(), 380);
+}
 
 // ==========================================
 // 1. INITIALISATION DE LA CARTE
@@ -515,7 +574,7 @@ function echapperHTML(texte) {
 
 function afficherRegion(nomRegion) {
 
-    regionSelectionnee = "Gabes";
+    regionSelectionnee = nomRegion;
 
     document.getElementById("imageGraphiqueRegion").style.display = "block";
     document.getElementById("tableauCapacite").style.display = "block";
@@ -528,10 +587,10 @@ function afficherRegion(nomRegion) {
     document.getElementById("retour").style.display = "block";
 
     document.getElementById("titrePanneau").textContent =
-        nomRegion;
+        "Gabes";
 
     document.getElementById("details").textContent =
-        "Informations sur la zone de Gabes";
+        "Informations sur la région " + nomRegion + ".";
 
     const couches = couchesRegions[nomRegion];
 
