@@ -209,7 +209,7 @@ button:hover {
     <h2>Carte interactive de la Tunisie</h2>
 </header>
 
-<div class="conteneur" id="conteneurPrincipal">\n    <button id="togglePanneau" type="button" onclick="basculerPanneau()" aria-label="Masquer le panneau" title="Masquer / afficher les tableaux et graphiques">‹</button>
+<div class="conteneur panneau-ferme" id="conteneurPrincipal">\n    <button id="togglePanneau" type="button" onclick="basculerPanneau()" aria-label="Afficher le panneau" title="Afficher les tableaux et graphiques">‹</button>
 
     <div class="carte-zone">
 
@@ -575,6 +575,17 @@ function echapperHTML(texte) {
 function afficherRegion(nomRegion) {
 
     regionSelectionnee = nomRegion;
+
+    // Ouvrir automatiquement le panneau dès qu'une région est sélectionnée.
+    const conteneurPrincipal = document.getElementById("conteneurPrincipal");
+    const boutonPanneau = document.getElementById("togglePanneau");
+    if (conteneurPrincipal.classList.contains("panneau-ferme")) {
+        conteneurPrincipal.classList.remove("panneau-ferme");
+        boutonPanneau.textContent = "›";
+        boutonPanneau.setAttribute("aria-label", "Masquer le panneau");
+        boutonPanneau.setAttribute("title", "Masquer les tableaux et graphiques");
+        setTimeout(() => map.invalidateSize(), 380);
+    }
 
     document.getElementById("imageGraphiqueRegion").style.display = "block";
     document.getElementById("tableauCapacite").style.display = "block";
