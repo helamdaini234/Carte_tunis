@@ -1,24 +1,15 @@
 
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Carte interactive des régions de Tunisie</title>
+<title>Carte interactive de la Tunisie</title>
 
 <link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-
-/* STYLE GENERAL */
-
 * {
     box-sizing: border-box;
 }
@@ -26,11 +17,12 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f1f4f8;
+    background: #f3f5f7;
+    color: #243447;
 }
 
 header {
-    background: #17365d;
+    background: #173b57;
     color: white;
     padding: 16px;
     text-align: center;
@@ -40,265 +32,206 @@ header h2 {
     margin: 0;
 }
 
-.container {
+.conteneur {
     display: flex;
-    height: calc(100vh - 60px);
+    gap: 12px;
+    padding: 12px;
+    height: calc(100vh - 65px);
 }
 
-/* PARTIE CARTE */
-
-.map-area {
-    width: 68%;
-    padding: 15px;
+.carte-zone {
+    flex: 1;
+    min-width: 0;
+    position: relative;
 }
 
 #map {
     width: 100%;
-    height: 88%;
-    background: #eaf2f8;
-    border: 2px solid #ccc;
+    height: 100%;
     border-radius: 10px;
+    border: 1px solid #ccd4dc;
+    background: #edf1f4;
 }
 
-/* PANNEAU DROIT */
-
-.panel {
-    width: 32%;
-    padding: 20px;
+.panneau {
+    width: 330px;
+    min-width: 280px;
     background: white;
-    border-left: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
     overflow-y: auto;
 }
 
-.panel h3 {
-    color: #17365d;
-}
-
-/* COORDONNEES */
-
-.controls {
-    background: white;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-}
-
-input {
-    width: 120px;
-    padding: 9px;
-    margin: 5px;
-    border: 1px solid #bbb;
-    border-radius: 5px;
+.panneau h3 {
+    margin-top: 0;
+    color: #173b57;
 }
 
 button {
-    padding: 10px 15px;
-    background: #1769d2;
-    color: white;
     border: none;
-    border-radius: 5px;
+    background: #173b57;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
     cursor: pointer;
+    margin: 5px 0;
 }
 
 button:hover {
-    background: #104b9b;
+    background: #28658d;
 }
 
-#coordonnees {
-    color: #1769d2;
-    font-weight: bold;
-}
-
-/* BOUTON RETOUR */
-
-#btnRetour {
+#retour {
     display: none;
-    background: #17365d;
-    margin-bottom: 10px;
+    position: absolute;
+    z-index: 1000;
+    top: 15px;
+    left: 15px;
 }
 
-#btnRetour:hover {
-    background: #28558b;
+input {
+    width: 100%;
+    padding: 9px;
+    margin: 5px 0 10px;
+    border: 1px solid #ccd4dc;
+    border-radius: 5px;
 }
-
-/* NOMS DES REGIONS */
 
 .region-label {
-    background: transparent;
-    border: none;
-    text-align: center;
-}
-
-.region-label span {
-    display: inline-block;
-    padding: 8px 12px;
-    background: rgba(255,255,255,0.93);
-    border: 2px solid #17365d;
-    border-radius: 8px;
-    color: #17365d;
+    background: white;
+    border: 2px solid #34495e;
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-size: 13px;
     font-weight: bold;
-    font-size: 14px;
+    text-align: center;
     white-space: nowrap;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+    box-shadow: 0 2px 5px #0003;
 }
-
-/* NOMS DES VILLES */
 
 .city-label {
-    background: transparent;
-    border: none;
-    color: #17365d;
-    font-size: 12px;
+    background: white;
+    border: 1px solid #42647e;
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: 11px;
     font-weight: bold;
+    color: #173b57;
     white-space: nowrap;
-    text-shadow:
-        1px 1px white,
-        -1px -1px white,
-        1px -1px white,
-        -1px 1px white;
+    box-shadow: 0 1px 4px #0003;
+    cursor: pointer;
 }
-
-/* LEGENDE */
 
 .legende {
+    position: absolute;
+    bottom: 18px;
+    left: 15px;
+    z-index: 900;
     background: white;
-    padding: 12px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    line-height: 25px;
+    padding: 10px;
+    border-radius: 7px;
+    box-shadow: 0 2px 6px #0003;
+    font-size: 12px;
+}
+
+.legende div {
+    margin: 5px 0;
+}
+
+.couleur {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
+#message {
     font-size: 13px;
+    color: #526779;
+    margin: 8px 0;
 }
-
-.legende strong {
-    display: block;
-    margin-bottom: 8px;
-    color: #17365d;
-}
-
-.legende-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.couleur-region {
-    width: 17px;
-    height: 17px;
-    border: 1px solid #777;
-    border-radius: 3px;
-    flex-shrink: 0;
-}
-
-/* GRAPHIQUE */
-
-#graphique {
-    margin-top: 20px;
-}
-
-#details {
-    line-height: 1.8;
-    color: #1769d2;
-}
-
-/* RESPONSIVE */
 
 @media(max-width: 800px) {
-
-    .container {
+    .conteneur {
         flex-direction: column;
         height: auto;
     }
 
-    .map-area,
-    .panel {
+    .carte-zone {
+        height: 65vh;
+    }
+
+    .panneau {
         width: 100%;
     }
-
-    #map {
-        height: 550px;
-    }
-
 }
-
 </style>
 </head>
 
 <body>
 
 <header>
-    <h2>Carte interactive des régions de Tunisie</h2>
+    <h2>Carte interactive de la Tunisie</h2>
 </header>
 
-<div class="container">
+<div class="conteneur">
 
-<!-- PARTIE GAUCHE -->
+    <div class="carte-zone">
 
-<div class="map-area">
-
-    <div class="controls">
-
-        <button id="btnRetour" onclick="retourRegions()">
+        <button id="retour" onclick="retourRegions()">
             ← Retour aux 4 régions
         </button>
 
-        <br>
+        <div id="map"></div>
 
-        <strong>Ajouter des coordonnées GPS :</strong>
-
-        <br>
-
-        Latitude :
-
-        <input type="number"
-        id="lat"
-        placeholder="Latitude"
-        step="any">
-
-        Longitude :
-
-        <input type="number"
-        id="lng"
-        placeholder="Longitude"
-        step="any">
-
-        <button onclick="ajouterPoint()">
-            Ajouter le point
-        </button>
-
-        <p id="coordonnees">
-            Aucune coordonnée sélectionnée
-        </p>
-
-        <p id="instruction">
-            Cliquez sur une région pour afficher ses villes.
-        </p>
+        <div class="legende">
+            <div><span class="couleur" style="background:#F4A261"></span>Nord-Est</div>
+            <div><span class="couleur" style="background:#4A90D9"></span>Nord-Ouest</div>
+            <div><span class="couleur" style="background:#64A66A"></span>Centre</div>
+            <div><span class="couleur" style="background:#A78BCA"></span>Sud</div>
+        </div>
 
     </div>
 
-    <div id="map"></div>
+    <aside class="panneau">
+
+        <h3 id="titrePanneau">Informations</h3>
+
+        <p id="details">
+            Cliquez sur une région pour afficher ses villes.
+        </p>
+
+        <p id="message">Chargement des données...</p>
+
+        <hr>
+
+        <h3>Ajouter un point GPS</h3>
+
+        <label>Latitude</label>
+        <input type="number" id="latitude" step="any"
+               placeholder="Exemple : 36.8065">
+
+        <label>Longitude</label>
+        <input type="number" id="longitude" step="any"
+               placeholder="Exemple : 10.1815">
+
+        <button onclick="ajouterPoint()">Ajouter le point bleu</button>
+
+        <hr>
+
+        <h3>Graphique</h3>
+        <canvas id="graphique"></canvas>
+
+    </aside>
 
 </div>
 
-<!-- PARTIE DROITE -->
-
-<div class="panel">
-
-    <h3>Informations géographiques</h3>
-
-    <p id="nomPoint">
-        Sélectionnez un point bleu
-    </p>
-
-    <p id="details">
-        Latitude : -- <br>
-        Longitude : --
-    </p>
-
-    <canvas id="graphique"></canvas>
-
-</div>
-
-</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
 
@@ -306,934 +239,600 @@ button:hover {
 // 1. INITIALISATION DE LA CARTE
 // ==========================================
 
-const map = L.map('map', {
-
+const map = L.map("map", {
     zoomControl: true,
-
     minZoom: 6,
-
-    maxZoom: 15,
-
-    maxBounds: [
-        [29, 6],
-        [38, 12.5]
-    ],
-
+    maxZoom: 12,
+    maxBounds: [[29, 6], [38.5, 12]],
     maxBoundsViscosity: 1
-
 });
 
-// Aucun fond de carte mondial.
+const boundsTunisie = L.latLngBounds(
+    [30.0, 7.0],
+    [37.7, 11.7]
+);
+
+map.fitBounds(boundsTunisie);
+
+const coucheVilles = L.layerGroup().addTo(map);
+const coucheGPS = L.layerGroup().addTo(map);
+
+let coucheGouvernorats;
+let marqueursRegions = [];
+let graphique = null;
+let regionSelectionnee = null;
+
+const couchesRegions = {
+    "Nord-Est": [],
+    "Nord-Ouest": [],
+    "Centre": [],
+    "Sud": []
+};
 
 // ==========================================
 // 2. DEFINITION DES 4 REGIONS
 // ==========================================
 
 const regions = {
-
     "Nord-Est": {
-
         couleur: "#F4A261",
-
         gouvernorats: [
-            "Tunis",
-            "Ariana",
-            "Ben Arous",
-            "Manouba",
-            "Nabeul",
-            "Zaghouan"
+            "TN-11", "TN-12", "TN-13", "TN-14",
+            "TN-21", "TN-22"
         ]
-
     },
 
     "Nord-Ouest": {
-
         couleur: "#4A90D9",
-
         gouvernorats: [
-            "Bizerte",
-            "Beja",
-            "Jendouba",
-            "Kef",
-            "Siliana"
+            "TN-23", "TN-31", "TN-32",
+            "TN-33", "TN-34"
         ]
-
     },
 
     "Centre": {
-
         couleur: "#64A66A",
-
         gouvernorats: [
-            "Sousse",
-            "Monastir",
-            "Mahdia",
-            "Kairouan",
-            "Kasserine",
-            "Sidi Bouzid",
-            "Sfax"
+            "TN-41", "TN-42", "TN-43",
+            "TN-51", "TN-52", "TN-53", "TN-61"
         ]
-
     },
 
     "Sud": {
-
         couleur: "#A78BCA",
-
         gouvernorats: [
-            "Gabes",
-            "Medenine",
-            "Tataouine",
-            "Gafsa",
-            "Tozeur",
-            "Kebili"
+            "TN-71", "TN-72", "TN-73",
+            "TN-81", "TN-82", "TN-83"
         ]
-
     }
-
 };
 
 // ==========================================
-// 3. LES VILLES PAR REGION
+// 3. IDENTIFICATION DES GOUVERNORATS
 // ==========================================
 
-const villes = [
-
-    // NORD-EST
-
-    {
-        nom: "Tunis",
-        lat: 36.8065,
-        lng: 10.1815,
-        region: "Nord-Est"
-    },
-
-    {
-        nom: "Ariana",
-        lat: 36.8625,
-        lng: 10.1956,
-        region: "Nord-Est"
-    },
-
-    {
-        nom: "Ben Arous",
-        lat: 36.7531,
-        lng: 10.2189,
-        region: "Nord-Est"
-    },
-
-    {
-        nom: "La Manouba",
-        lat: 36.8081,
-        lng: 10.0972,
-        region: "Nord-Est"
-    },
-
-    {
-        nom: "Nabeul",
-        lat: 36.4513,
-        lng: 10.7357,
-        region: "Nord-Est"
-    },
-
-    {
-        nom: "Zaghouan",
-        lat: 36.4029,
-        lng: 10.1429,
-        region: "Nord-Est"
-    },
-
-    // NORD-OUEST
-
-    {
-        nom: "Bizerte",
-        lat: 37.2744,
-        lng: 9.8739,
-        region: "Nord-Ouest"
-    },
-
-    {
-        nom: "Béja",
-        lat: 36.7256,
-        lng: 9.1817,
-        region: "Nord-Ouest"
-    },
-
-    {
-        nom: "Jendouba",
-        lat: 36.5011,
-        lng: 8.7802,
-        region: "Nord-Ouest"
-    },
-
-    {
-        nom: "Le Kef",
-        lat: 36.1742,
-        lng: 8.7049,
-        region: "Nord-Ouest"
-    },
-
-    {
-        nom: "Siliana",
-        lat: 36.0849,
-        lng: 9.3708,
-        region: "Nord-Ouest"
-    },
-
-    // CENTRE
-
-    {
-        nom: "Sousse",
-        lat: 35.8256,
-        lng: 10.6084,
-        region: "Centre"
-    },
-
-    {
-        nom: "Monastir",
-        lat: 35.7770,
-        lng: 10.8262,
-        region: "Centre"
-    },
-
-    {
-        nom: "Mahdia",
-        lat: 35.5047,
-        lng: 11.0622,
-        region: "Centre"
-    },
-
-    {
-        nom: "Kairouan",
-        lat: 35.6781,
-        lng: 10.0963,
-        region: "Centre"
-    },
-
-    {
-        nom: "Kasserine",
-        lat: 35.1676,
-        lng: 8.8365,
-        region: "Centre"
-    },
-
-    {
-        nom: "Sidi Bouzid",
-        lat: 35.0382,
-        lng: 9.4858,
-        region: "Centre"
-    },
-
-    {
-        nom: "Sfax",
-        lat: 34.7406,
-        lng: 10.7603,
-        region: "Centre"
-    },
-
-    // SUD
-
-    {
-        nom: "Gabès",
-        lat: 33.8815,
-        lng: 10.0982,
-        region: "Sud"
-    },
-
-    {
-        nom: "Médenine",
-        lat: 33.3549,
-        lng: 10.5055,
-        region: "Sud"
-    },
-
-    {
-        nom: "Tataouine",
-        lat: 32.9297,
-        lng: 10.4518,
-        region: "Sud"
-    },
-
-    {
-        nom: "Gafsa",
-        lat: 34.4250,
-        lng: 8.7842,
-        region: "Sud"
-    },
-
-    {
-        nom: "Tozeur",
-        lat: 33.9197,
-        lng: 8.1335,
-        region: "Sud"
-    },
-
-    {
-        nom: "Kébili",
-        lat: 33.7044,
-        lng: 8.9690,
-        region: "Sud"
-    }
-
-];
-
-// ==========================================
-// 4. NORMALISATION DES NOMS
-// ==========================================
-
-function normaliser(nom) {
-
-    return String(nom)
-
+function normaliser(texte) {
+    return String(texte || "")
         .normalize("NFD")
-
         .replace(/[\u0300-\u036f]/g, "")
-
         .toLowerCase()
-
+        .replace(/^la\s+/, "")
+        .replace(/^le\s+/, "")
         .trim();
-
 }
 
-// ==========================================
-// 5. IDENTIFIER LES GOUVERNORATS
-// ==========================================
+const nomsGouvernorats = {
+    "tunis": "TN-11",
+    "ariana": "TN-12",
+    "ben arous": "TN-13",
+    "manouba": "TN-14",
+    "nabeul": "TN-21",
+    "zaghouan": "TN-22",
+    "bizerte": "TN-23",
+    "beja": "TN-31",
+    "jendouba": "TN-32",
+    "kef": "TN-33",
+    "siliana": "TN-34",
+    "kairouan": "TN-41",
+    "kasserine": "TN-42",
+    "sidi bouzid": "TN-43",
+    "sousse": "TN-51",
+    "monastir": "TN-52",
+    "mahdia": "TN-53",
+    "sfax": "TN-61",
+    "gafsa": "TN-71",
+    "tozeur": "TN-72",
+    "kebili": "TN-73",
+    "gabes": "TN-81",
+    "medenine": "TN-82",
+    "tataouine": "TN-83"
+};
 
-function nomGouvernorat(feature) {
+function codeGouvernorat(feature) {
+    const p = feature.properties || {};
 
-    const p = feature.properties;
+    const valeurs = [
+        p.id,
+        p.code,
+        p.iso,
+        p.iso_3166_2,
+        p.name_fr,
+        p.nom_fr,
+        p.name,
+        p.NAME_1,
+        p.nom,
+        feature.id
+    ];
 
-    return p.NAME_1 ||
-           p.name ||
-           p.nom ||
-           p.NAME ||
-           "Gouvernorat";
+    for (const valeur of valeurs) {
+        const texte = String(valeur || "").toUpperCase();
 
-}
+        if (/^TN-\d+$/.test(texte)) {
+            return texte;
+        }
 
-function trouverRegion(nom) {
+        const nom = normaliser(valeur);
 
-    const nomNormalise = normaliser(nom);
-
-    for (const [region, infos] of Object.entries(regions)) {
-
-        const existe = infos.gouvernorats.some(
-            gouvernorat =>
-                normaliser(gouvernorat) === nomNormalise
-        );
-
-        if (existe) return region;
-
+        if (nomsGouvernorats[nom]) {
+            return nomsGouvernorats[nom];
+        }
     }
 
     return null;
+}
 
+function regionDuGouvernorat(code) {
+    if (!code) return null;
+
+    for (const [nom, region] of Object.entries(regions)) {
+        if (region.gouvernorats.includes(code)) {
+            return nom;
+        }
+    }
+
+    return null;
 }
 
 // ==========================================
-// 6. VARIABLES DE LA CARTE
+// 4. CHARGEMENT DES DONNEES DES VILLES
 // ==========================================
 
-let coucheTunisie;
+const URL_VILLES =
+"https://raw.githubusercontent.com/Alaa-Taieb/map-tunisia/main/dist/data/cities.csv";
 
-let couchesRegions = {};
+const URL_GOUVERNORATS =
+"https://raw.githubusercontent.com/Alaa-Taieb/map-tunisia/main/dist/geojson/tunisia-governorates-medium.geojson";
 
-let marqueursRegions = [];
+let villes = [];
 
-let coucheVilles = L.layerGroup().addTo(map);
+async function chargerVilles() {
 
-let regionSelectionnee = null;
+    const reponse = await fetch(URL_VILLES);
 
-let graphique = null;
+    if (!reponse.ok) {
+        throw new Error("Impossible de charger le fichier des villes.");
+    }
 
-let numero = 0;
+    const csv = await reponse.text();
+
+    const resultat = Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true
+    });
+
+    villes = resultat.data
+        .map(v => {
+            const code = String(v.governorate || "").toUpperCase();
+
+            return {
+                nom: v.name_fr || v.name_en || v.name_ar || "Localité",
+                lat: Number(v.lat),
+                lng: Number(v.lon),
+                code: code,
+                region: regionDuGouvernorat(code),
+                type: v.place || "localité"
+            };
+        })
+        .filter(v =>
+            Number.isFinite(v.lat) &&
+            Number.isFinite(v.lng) &&
+            v.region
+        );
+
+    return villes;
+}
 
 // ==========================================
-// 7. STYLE DES GOUVERNORATS
+// 5. STYLE DES GOUVERNORATS
 // ==========================================
 
-function styleRegion(feature) {
+function styleGouvernorat(feature) {
 
-    const nom = nomGouvernorat(feature);
-
-    const region = trouverRegion(nom);
+    const code = codeGouvernorat(feature);
+    const region = regionDuGouvernorat(code);
 
     return {
-
         color: "#ffffff",
-
-        weight: 2,
-
+        weight: 1.5,
+        opacity: 1,
         fillColor: region
             ? regions[region].couleur
             : "#cccccc",
-
-        fillOpacity: 0.85
-
+        fillOpacity: 0.8
     };
-
 }
 
 // ==========================================
-// 8. CHARGEMENT DES FRONTIERES
+// 6. LABELS DES REGIONS
 // ==========================================
 
-fetch(
-'https://raw.githubusercontent.com/riatelab/tunisie/master/data/TN-gouvernorats.geojson'
-)
+function supprimerLabelsRegions() {
+    marqueursRegions.forEach(m => map.removeLayer(m));
+    marqueursRegions = [];
+}
 
-.then(response => {
+function afficherLabelsRegions() {
 
-    if (!response.ok) {
-        throw new Error("Erreur de chargement");
-    }
-
-    return response.json();
-
-})
-
-.then(data => {
-
-    coucheTunisie = L.geoJSON(data, {
-
-        style: styleRegion,
-
-        onEachFeature: function(feature, layer) {
-
-            const nom = nomGouvernorat(feature);
-
-            const region = trouverRegion(nom);
-
-            if (!region) {
-                console.warn("Gouvernorat non classé :", nom);
-                return;
-            }
-
-            // Ajouter le gouvernorat à sa région
-
-            if (!couchesRegions[region]) {
-
-                couchesRegions[region] = [];
-
-            }
-
-            couchesRegions[region].push(layer);
-
-            // Informations au survol
-
-            layer.bindTooltip(
-
-                "<b>" + nom + "</b><br>" +
-                "Région : " + region,
-
-                {
-                    sticky: true
-                }
-
-            );
-
-            // Effet de survol
-
-            layer.on('mouseover', function() {
-
-                layer.setStyle({
-
-                    weight: 3,
-
-                    color: "#222",
-
-                    fillOpacity: 1
-
-                });
-
-            });
-
-            layer.on('mouseout', function() {
-
-                coucheTunisie.resetStyle(layer);
-
-            });
-
-            // CLIC SUR UN GOUVERNORAT
-
-            layer.on('click', function() {
-
-                if (region) {
-
-                    afficherRegion(region);
-
-                }
-
-            });
-
-        }
-
-    }).addTo(map);
-
-    // Vue générale
-
-    afficherToutesRegions();
-
-})
-
-.catch(error => {
-
-    console.error(error);
-
-    alert(
-        "Impossible de charger les frontières de la Tunisie."
-    );
-
-});
-
-// ==========================================
-// 9. AFFICHER LES NOMS DES 4 REGIONS
-// ==========================================
-
-function afficherToutesRegions() {
-
-    // Supprimer les anciens noms de régions
-
-    supprimerMarqueursRegions();
-
-    // Supprimer les villes
-
-    coucheVilles.clearLayers();
-
-    regionSelectionnee = null;
-
-    document.getElementById("btnRetour").style.display = "none";
-
-    document.getElementById("instruction").innerText =
-        "Cliquez sur une région pour afficher ses villes.";
-
-    // Afficher les quatre régions
+    supprimerLabelsRegions();
 
     for (const nomRegion of Object.keys(regions)) {
 
-        const couches = couchesRegions[nomRegion] || [];
+        const couches = couchesRegions[nomRegion];
 
-        if (couches.length === 0) continue;
+        if (!couches.length) continue;
 
         const groupe = L.featureGroup(couches);
-
         const centre = groupe.getBounds().getCenter();
 
-        const icone = L.divIcon({
-
-            className: "region-label",
-
-            html: "<span>" + nomRegion + "</span>",
-
-            iconSize: [140, 35],
-
-            iconAnchor: [70, 17]
-
-        });
-
-        const marqueur = L.marker(centre, {
-
-            icon: icone,
-
-            zIndexOffset: 1000
-
+        const label = L.marker(centre, {
+            icon: L.divIcon({
+                className: "",
+                html: `<div class="region-label">${nomRegion}</div>`,
+                iconSize: null,
+                iconAnchor: [55, 15]
+            })
         }).addTo(map);
 
-        marqueur.on('click', function() {
-
+        label.on("click", function() {
             afficherRegion(nomRegion);
-
         });
 
-        marqueursRegions.push(marqueur);
-
+        marqueursRegions.push(label);
     }
-
-    // Retour à la vue générale de la Tunisie
-
-    map.fitBounds(coucheTunisie.getBounds(), {
-        padding: [20, 20]
-    });
-
 }
 
 // ==========================================
-// 10. SUPPRIMER LES LABELS DES REGIONS
+// 7. AFFICHER UNE REGION ET SES VILLES
 // ==========================================
 
-function supprimerMarqueursRegions() {
-
-    marqueursRegions.forEach(function(marqueur) {
-
-        map.removeLayer(marqueur);
-
-    });
-
-    marqueursRegions = [];
-
+function echapperHTML(texte) {
+    return String(texte).replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[c]);
 }
-
-// ==========================================
-// 11. AFFICHER UNE REGION ET SES VILLES
-// ==========================================
 
 function afficherRegion(nomRegion) {
 
-    if (!couchesRegions[nomRegion]) return;
-
     regionSelectionnee = nomRegion;
 
-    // Supprimer les noms des quatre régions
-
-    supprimerMarqueursRegions();
-
-    // Supprimer les anciennes villes
-
+    supprimerLabelsRegions();
     coucheVilles.clearLayers();
 
-    // Afficher le bouton retour
+    document.getElementById("retour").style.display = "block";
 
-    document.getElementById("btnRetour").style.display =
-        "inline-block";
+    document.getElementById("titrePanneau").textContent =
+        nomRegion;
 
-    document.getElementById("instruction").innerText =
-        "Région sélectionnée : " + nomRegion +
-        " — Les villes de cette région sont affichées.";
-
-    // Créer un groupe avec les gouvernorats de la région
-
-    const groupeRegion = L.featureGroup(
-        couchesRegions[nomRegion]
+    const villesRegion = villes.filter(v =>
+        v.region === nomRegion
     );
 
-    // Zoom automatique sur la région
+    document.getElementById("details").innerHTML =
+        `<b>${villesRegion.length}</b> villes et localités répertoriées dans la région ${nomRegion}.`;
 
-    map.fitBounds(
+    const couches = couchesRegions[nomRegion];
 
-        groupeRegion.getBounds(),
+    if (couches.length) {
 
-        {
-            padding: [40, 40],
-            maxZoom: 9
-        }
+        const groupe = L.featureGroup(couches);
 
-    );
-
-    // Afficher uniquement les villes de cette région
-
-    const villesRegion = villes.filter(function(ville) {
-
-        return ville.region === nomRegion;
-
-    });
-
-    villesRegion.forEach(function(ville) {
-
-        const icone = L.divIcon({
-
-            className: "city-label",
-
-            html: "● " + ville.nom,
-
-            iconSize: [110, 20],
-
-            iconAnchor: [5, 10]
-
+        map.fitBounds(groupe.getBounds(), {
+            padding: [35, 35],
+            maxZoom: 9,
+            animate: true
         });
+    }
+
+    // Afficher toutes les localités de la région
+
+    villesRegion.forEach(ville => {
 
         const marqueur = L.marker(
-
             [ville.lat, ville.lng],
-
             {
-                icon: icone
+                icon: L.divIcon({
+                    className: "",
+                    html: `<div class="city-label">${echapperHTML(ville.nom)}</div>`,
+                    iconSize: null,
+                    iconAnchor: [-3, 8]
+                })
             }
-
-        ).addTo(coucheVilles);
-
-        marqueur.bindPopup(
-
-            "<b>" + ville.nom + "</b><br>" +
-            "Région : " + nomRegion +
-            "<br>Latitude : " + ville.lat +
-            "<br>Longitude : " + ville.lng
-
         );
 
+        marqueur.addTo(coucheVilles);
+
+        marqueur.on("click", function() {
+            afficherVille(ville);
+        });
+
+        marqueur.bindTooltip(
+            ville.nom,
+            { direction: "top" }
+        );
     });
 
+    document.getElementById("message").textContent =
+        villesRegion.length + " localités affichées sur la carte.";
 }
 
 // ==========================================
-// 12. RETOUR AUX QUATRE REGIONS
+// 8. AFFICHER LES INFORMATIONS D'UNE VILLE
+// ==========================================
+
+function afficherVille(ville) {
+
+    document.getElementById("titrePanneau").textContent =
+        ville.nom;
+
+    document.getElementById("details").innerHTML = `
+        <b>Ville :</b> ${echapperHTML(ville.nom)}<br><br>
+        <b>Région :</b> ${echapperHTML(ville.region)}<br><br>
+        <b>Latitude :</b> ${ville.lat}<br>
+        <b>Longitude :</b> ${ville.lng}<br><br>
+        <b>Type :</b> ${echapperHTML(ville.type)}
+    `;
+
+    document.getElementById("latitude").value = ville.lat;
+    document.getElementById("longitude").value = ville.lng;
+
+    afficherGraphique(ville.nom);
+}
+
+// ==========================================
+// 9. RETOUR A LA CARTE GENERALE
 // ==========================================
 
 function retourRegions() {
 
-    afficherToutesRegions();
+    regionSelectionnee = null;
 
+    coucheVilles.clearLayers();
+
+    supprimerLabelsRegions();
+
+    document.getElementById("retour").style.display = "none";
+
+    document.getElementById("titrePanneau").textContent =
+        "Informations";
+
+    document.getElementById("details").textContent =
+        "Cliquez sur une région pour afficher ses villes.";
+
+    document.getElementById("message").textContent =
+        "Vue générale de la Tunisie.";
+
+    map.fitBounds(boundsTunisie, {
+        padding: [20, 20],
+        animate: true
+    });
+
+    afficherLabelsRegions();
 }
 
 // ==========================================
-// 13. LEGENDE DES REGIONS
+// 10. GRAPHIQUE
 // ==========================================
 
-const legende = L.control({
+function afficherGraphique(nom) {
 
-    position: "bottomright"
+    const ctx = document.getElementById("graphique");
 
-});
-
-legende.onAdd = function(map) {
-
-    const div = L.DomUtil.create("div", "legende");
-
-    let contenu = "<strong>Régions de Tunisie</strong>";
-
-    for (const [nom, infos] of Object.entries(regions)) {
-
-        contenu += `
-
-            <div class="legende-item">
-
-                <span class="couleur-region"
-                style="background:${infos.couleur}">
-                </span>
-
-                ${nom}
-
-            </div>
-
-        `;
-
+    if (graphique) {
+        graphique.destroy();
     }
 
-    div.innerHTML = contenu;
+    graphique = new Chart(ctx, {
+        type: "line",
 
-    L.DomEvent.disableClickPropagation(div);
+        data: {
+            labels: [
+                "Janvier",
+                "Février",
+                "Mars",
+                "Avril",
+                "Mai",
+                "Juin",
+                "Juillet"
+            ],
 
-    return div;
+            datasets: [{
+                label: "Données de " + nom,
+                data: [12, 18, 15, 25, 20, 30, 27],
+                borderColor: "#2878b5",
+                backgroundColor: "#2878b522",
+                fill: true,
+                tension: 0.3
+            }]
+        },
 
-};
-
-legende.addTo(map);
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            }
+        }
+    });
+}
 
 // ==========================================
-// 14. AJOUT DES POINTS GPS EN BLEU
+// 11. AJOUTER UN POINT GPS BLEU
 // ==========================================
 
 function ajouterPoint() {
 
-    const lat = parseFloat(
-        document.getElementById("lat").value
+    const lat = Number(
+        document.getElementById("latitude").value
     );
 
-    const lng = parseFloat(
-        document.getElementById("lng").value
+    const lng = Number(
+        document.getElementById("longitude").value
     );
 
     if (
-
         !Number.isFinite(lat) ||
-
         !Number.isFinite(lng) ||
-
-        lat < 30 || lat > 37.5 ||
-
+        lat < 30 || lat > 38 ||
         lng < 7 || lng > 12
-
     ) {
-
         alert("Veuillez saisir des coordonnées valides en Tunisie.");
-
         return;
-
     }
 
-    numero++;
-
-    const point = {
-
-        id: numero,
-
-        lat: lat,
-
-        lng: lng
-
-    };
-
-    // Marqueur bleu
-
-    const marqueur = L.circleMarker(
-
+    const point = L.circleMarker(
         [lat, lng],
-
         {
-
             radius: 8,
-
-            color: "blue",
-
-            fillColor: "#1685ff",
-
+            color: "#0055ff",
+            fillColor: "#007bff",
             fillOpacity: 1,
-
             weight: 2
-
         }
+    ).addTo(coucheGPS);
 
-    ).addTo(map);
+    point.bindPopup(
+        `Point GPS<br>Latitude : ${lat}<br>Longitude : ${lng}`
+    );
 
-    marqueur.bindPopup("Point " + numero);
-
-    marqueur.on("click", function() {
-
-        afficherGraphique(point);
-
+    point.on("click", function() {
+        afficherGraphique("Point GPS");
     });
 
     map.setView([lat, lng], 10);
 
-    afficherGraphique(point);
-
+    point.openPopup();
 }
 
 // ==========================================
-// 15. CLIC SUR LA CARTE : COORDONNEES
+// 12. RECUPERER LES COORDONNEES AU CLIC
 // ==========================================
 
 map.on("click", function(e) {
 
-    const lat = e.latlng.lat;
+    document.getElementById("latitude").value =
+        e.latlng.lat.toFixed(6);
 
-    const lng = e.latlng.lng;
-
-    document.getElementById("lat").value =
-        lat.toFixed(6);
-
-    document.getElementById("lng").value =
-        lng.toFixed(6);
-
-    document.getElementById("coordonnees").innerText =
-
-        "Latitude : " + lat.toFixed(6) +
-
-        " | Longitude : " + lng.toFixed(6);
-
+    document.getElementById("longitude").value =
+        e.latlng.lng.toFixed(6);
 });
 
 // ==========================================
-// 16. GRAPHIQUE A DROITE
+// 13. CHARGEMENT DE LA CARTE ET DES DONNEES
 // ==========================================
 
-function afficherGraphique(point) {
+async function initialiserCarte() {
 
-    document.getElementById("nomPoint").innerHTML =
+    try {
 
-        "<strong>Point " + point.id + "</strong>";
+        document.getElementById("message").textContent =
+            "Chargement de la carte et des localités...";
 
-    document.getElementById("details").innerHTML =
+        const [reponseGeo, donneesVilles] = await Promise.all([
+            fetch(URL_GOUVERNORATS),
+            chargerVilles()
+        ]);
 
-        "Latitude : " + point.lat.toFixed(6) +
-
-        "<br>Longitude : " + point.lng.toFixed(6);
-
-    document.getElementById("coordonnees").innerText =
-
-        "Latitude : " + point.lat.toFixed(6) +
-
-        " | Longitude : " + point.lng.toFixed(6);
-
-    // Valeurs fictives de démonstration
-
-    const valeurs = [
-        12, 18, 15, 25, 20, 30, 27
-    ];
-
-    const mois = [
-
-        "Janvier",
-        "Février",
-        "Mars",
-        "Avril",
-        "Mai",
-        "Juin",
-        "Juillet"
-
-    ];
-
-    if (graphique) {
-
-        graphique.destroy();
-
-    }
-
-    graphique = new Chart(
-
-        document.getElementById("graphique"),
-
-        {
-
-            type: "line",
-
-            data: {
-
-                labels: mois,
-
-                datasets: [{
-
-                    label: "Valeurs du point",
-
-                    data: valeurs,
-
-                    borderColor: "#1769d2",
-
-                    backgroundColor:
-                    "rgba(23,105,210,0.15)",
-
-                    borderWidth: 3,
-
-                    fill: true,
-
-                    tension: 0.4
-
-                }]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                plugins: {
-
-                    title: {
-
-                        display: true,
-
-                        text: "Graphique du point " + point.id
-
-                    }
-
-                },
-
-                scales: {
-
-                    y: {
-
-                        beginAtZero: true
-
-                    }
-
-                }
-
-            }
-
+        if (!reponseGeo.ok) {
+            throw new Error("Impossible de charger les gouvernorats.");
         }
 
-    );
+        const geojson = await reponseGeo.json();
 
+        coucheGouvernorats = L.geoJSON(geojson, {
+
+            style: styleGouvernorat,
+
+            onEachFeature: function(feature, layer) {
+
+                const code = codeGouvernorat(feature);
+                const region = regionDuGouvernorat(code);
+
+                const nom = feature.properties.name_fr ||
+                            feature.properties.nom_fr ||
+                            feature.properties.name ||
+                            feature.properties.NAME_1 ||
+                            code ||
+                            "Gouvernorat";
+
+                if (region) {
+                    couchesRegions[region].push(layer);
+                }
+
+                layer.bindTooltip(nom);
+
+                layer.on("mouseover", function() {
+                    layer.setStyle({
+                        weight: 3,
+                        color: "#222",
+                        fillOpacity: 0.95
+                    });
+                });
+
+                layer.on("mouseout", function() {
+                    coucheGouvernorats.resetStyle(layer);
+                });
+
+                layer.on("click", function(e) {
+
+                    L.DomEvent.stopPropagation(e);
+
+                    if (region) {
+                        afficherRegion(region);
+                    }
+                });
+            }
+
+        }).addTo(map);
+
+        map.fitBounds(coucheGouvernorats.getBounds(), {
+            padding: [20, 20]
+        });
+
+        afficherLabelsRegions();
+
+        document.getElementById("message").textContent =
+            donneesVilles.length +
+            " localités chargées. Cliquez sur une région.";
+
+    } catch (erreur) {
+
+        console.error(erreur);
+
+        document.getElementById("message").textContent =
+            "Erreur de chargement : " + erreur.message;
+
+        alert(
+            "Impossible de charger les données. Vérifiez votre connexion Internet."
+        );
+    }
 }
+
+initialiserCarte();
 
 </script>
 
